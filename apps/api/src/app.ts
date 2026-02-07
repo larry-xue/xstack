@@ -11,20 +11,20 @@ const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void>
 
   // Do not touch the following lines
 
-  // This loads all plugins defined in plugins
+  // This loads all plugins defined in server/plugins
   // those should be support plugins that are reused
   // through your application
   // eslint-disable-next-line no-void
   void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'plugins'),
+    dir: join(__dirname, 'server', 'plugins'),
     options: opts,
   })
 
-  // This loads all plugins defined in routes
+  // This loads all modules defined in server/modules
   // define your routes in one of these
   // eslint-disable-next-line no-void
   void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'routes'),
+    dir: join(__dirname, 'server', 'modules'),
     options: opts,
   })
 }
