@@ -1,0 +1,20 @@
+{
+  "name": "xstack",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "turbo test",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo run typecheck"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "turbo": "^2.8.3"
+  },
+  "packageManager": "pnpm@10.6.5"
+}
