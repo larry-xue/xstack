@@ -19,8 +19,14 @@
   "devDependencies": {
     "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
+    "supabase": "^2.75.5",
     "turbo": "^2.8.3",
     "typescript": "~5.9.3"
   },
-  "packageManager": "pnpm@10.6.5"
+  "packageManager": "pnpm@10.6.5",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "supabase"
+    ]
+  }
 }

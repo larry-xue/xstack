@@ -23,6 +23,7 @@
     "@fastify/autoload": "^6.0.0",
     "@fastify/sensible": "^6.0.0",
     "@repo/contracts": "workspace:*",
+    "@supabase/supabase-js": "^2.95.3",
     "@ts-rest/fastify": "^3.52.1",
     "fastify": "^5.0.0",
     "fastify-cli": "^7.4.1",
@@ -30,11 +31,11 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.8",
+    "@vitest/coverage-v8": "latest",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^3.0.0",
     "ts-node": "^10.4.0",
-    "@vitest/coverage-v8": "latest",
     "typescript": "~5.9.2",
     "vitest": "latest"
   }
