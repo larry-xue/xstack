@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true,
+    "es2022": true
+  },
+  "ignorePatterns": [
+    "node_modules/**",
+    "**/node_modules/**",
+    "dist/**",
+    "**/dist/**",
+    "build/**",
+    "**/build/**",
+    ".turbo/**",
+    "**/.turbo/**",
+    ".astro/**",
+    "**/.astro/**",
+    ".next/**",
+    "**/.next/**",
+    "coverage/**",
+    "**/coverage/**"
+  ]
+}

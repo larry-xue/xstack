@@ -11,14 +11,14 @@ const AppPath = path.join(__dirname, '..', 'src', 'app.ts')
 
 // Fill in this config with all the configurations
 // needed for testing the application
-function config () {
+function config() {
   return {
-    skipOverride: true // Register our application with fastify-plugin
+    skipOverride: true, // Register our application with fastify-plugin
   }
 }
 
 // Automatically build and tear down our instance
-async function build (t: TestContext) {
+async function build(t: TestContext) {
   // you can set all the options supported by the fastify CLI command
   const argv = [AppPath]
 
@@ -34,7 +34,4 @@ async function build (t: TestContext) {
   return app
 }
 
-export {
-  config,
-  build
-}
+export { config, build }

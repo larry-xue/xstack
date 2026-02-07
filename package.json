@@ -1,20 +1,26 @@
 {
   "name": "xstack",
   "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "main": "index.js",
   "scripts": {
     "test": "turbo test",
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "turbo lint",
+    "lint": "oxlint --config .oxlintrc.json --react-plugin --node-plugin .",
+    "lint:fix": "oxlint --config .oxlintrc.json --react-plugin --node-plugin --fix .",
+    "fmt": "oxfmt --config .oxfmtrc.jsonc --write .",
+    "fmt:check": "oxfmt --config .oxfmtrc.jsonc --check .",
     "typecheck": "turbo run typecheck"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "turbo": "^2.8.3"
+    "oxfmt": "^0.28.0",
+    "oxlint": "^1.43.0",
+    "turbo": "^2.8.3",
+    "typescript": "~5.9.3"
   },
   "packageManager": "pnpm@10.6.5"
 }
