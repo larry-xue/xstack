@@ -1,3 +1,4 @@
-import { createClient } from '@repo/sdk'
+import { edenTreaty } from '@elysiajs/eden'
+import type { App } from '@repo/api'
 
-export const sdk = createClient({ baseUrl: '' })
+export const api = edenTreaty<App>('')

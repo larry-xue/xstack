@@ -6,19 +6,21 @@
   "license": "ISC",
   "author": "",
   "main": "dist/server.js",
+  "type": "module",
   "scripts": {
-    "build:ts": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc",
+    "build:shared": "pnpm --filter @repo/api build",
+    "watch:shared": "pnpm --filter @repo/api watch",
+    "build:ts": "pnpm build:shared && node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc",
     "watch:ts": "tsc -w",
     "dev:start": "node --watch dist/server.js",
-    "dev": "pnpm build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
+    "dev": "pnpm build:ts && concurrently -k -p \"[{name}]\" -n \"Shared,TypeScript,App\" -c \"green.bold,yellow.bold,cyan.bold\" \"npm:watch:shared\" \"npm:watch:ts\" \"npm:dev:start\"",
     "start": "pnpm build:ts && node dist/server.js",
     "test": "pnpm build:ts && tsc -p test/tsconfig.json --noEmit && vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@elysiajs/node": "latest",
-    "@elysiajs/openapi": "^1.4.14",
-    "elysia": "latest"
+    "@repo/api": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.8",

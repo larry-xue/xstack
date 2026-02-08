@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest'
-
-import { createApp } from '../src/app'
+import { createApp } from '@repo/api'
 
 test('GET /health returns ok', async () => {
   const app = createApp()

@@ -29,12 +29,9 @@ importers:
       '@elysiajs/node':
         specifier: latest
         version: 1.4.3(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))
-      '@elysiajs/openapi':
-        specifier: ^1.4.14
-        version: 1.4.14(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))
-      elysia:
-        specifier: latest
-        version: 1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3)
+      '@repo/api':
+        specifier: workspace:*
+        version: link:../../packages/api
     devDependencies:
       '@types/node':
         specifier: ^24.0.8
@@ -51,15 +48,21 @@ importers:
 
   apps/app:
     dependencies:
-      '@repo/sdk':
+      '@elysiajs/eden':
+        specifier: latest
+        version: 1.4.6(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))
+      '@repo/api':
         specifier: workspace:*
-        version: link:../../packages/sdk
+        version: link:../../packages/api
       '@supabase/supabase-js':
         specifier: ^2.95.3
         version: 2.95.3
       '@tanstack/react-query':
         specifier: ^5.90.1
         version: 5.90.20(react@19.2.4)
+      elysia:
+        specifier: latest
+        version: 1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3)
       react:
         specifier: ^19.2.0
         version: 19.2.4
@@ -86,23 +89,14 @@ importers:
         specifier: ^7.2.4
         version: 7.3.1(@types/node@24.10.11)
 
-  packages/contracts:
+  packages/api:
     dependencies:
-      '@ts-rest/core':
-        specifier: ^3.52.1
-        version: 3.52.1(@types/node@24.10.11)(zod@3.25.76)
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
-
-  packages/sdk:
-    dependencies:
-      '@repo/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@ts-rest/core':
-        specifier: ^3.52.1
-        version: 3.52.1(@types/node@24.10.11)(zod@3.25.76)
+      '@elysiajs/openapi':
+        specifier: ^1.4.14
+        version: 1.4.14(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))
+      elysia:
+        specifier: latest
+        version: 1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3)
 
 packages:
 
@@ -191,6 +185,11 @@ packages:
 
   '@borewit/text-codec@0.2.1':
     resolution: {integrity: sha512-k7vvKPbf7J2fZ5klGRD9AeKfUvojuZIQ3BT5u7Jfv+puwXkUBUT5PVyMDfJZpy30CBDXGMgw7fguK/lpOMBvgw==}
+
+  '@elysiajs/eden@1.4.6':
+    resolution: {integrity: sha512-Tsa4NwXEWg/u73vWiYZQ3L5/ecgZSxqiEjYwpS+4qBKXeTZqZKl2hcgHJSVBL+InEDMi35Xugct7qyAXE5oM4Q==}
+    peerDependencies:
+      elysia: '>=1.4.19'
 
   '@elysiajs/node@1.4.3':
     resolution: {integrity: sha512-Qw2SGfiVB7R+L8iU3fjGDGHdTPP/lUkQyi15dfvvsMPcmVEDweKW+FSt6ae6SSvQc5Di111g44vTV9FHwUPdvA==}
@@ -630,17 +629,6 @@ packages:
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
-
-  '@ts-rest/core@3.52.1':
-    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
-    peerDependencies:
-      '@types/node': ^18.18.7 || >=20.8.4
-      zod: ^3.22.3
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      zod:
-        optional: true
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -1306,9 +1294,6 @@ packages:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
 snapshots:
 
   '@babel/code-frame@7.29.0':
@@ -1424,6 +1409,10 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@borewit/text-codec@0.2.1': {}
+
+  '@elysiajs/eden@1.4.6(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))':
+    dependencies:
+      elysia: 1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3)
 
   '@elysiajs/node@1.4.3(elysia@1.4.22(@sinclair/typebox@0.34.48)(exact-mirror@0.2.6(@sinclair/typebox@0.34.48))(file-type@21.3.0)(openapi-types@12.1.3)(typescript@5.9.3))':
     dependencies:
@@ -1718,11 +1707,6 @@ snapshots:
       - supports-color
 
   '@tokenizer/token@0.3.0': {}
-
-  '@ts-rest/core@3.52.1(@types/node@24.10.11)(zod@3.25.76)':
-    optionalDependencies:
-      '@types/node': 24.10.11
-      zod: 3.25.76
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -2341,5 +2325,3 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
-
-  zod@3.25.76: {}
