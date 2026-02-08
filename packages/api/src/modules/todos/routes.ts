@@ -1,12 +1,14 @@
 import { Elysia, t } from 'elysia'
 import type { AuthContext } from '../../plugins/auth'
+import { buildError } from '../../schemas/error'
 import { todoService } from './service'
-import { createTodoBody, errorResponse, todoResponse, updateTodoBody } from './schema'
+import { createTodoBody, todoResponse, updateTodoBody } from './schema'
+import { errorResponse } from '../../schemas/error'
 
 type AuthSingleton = {
   decorator: {}
   store: {}
-  derive: { auth: AuthContext | null }
+  derive: { auth: AuthContext | null; requestId: string }
   resolve: {}
 }
 
@@ -38,11 +40,15 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   )
   .patch(
     '/todos/:id',
-    async ({ auth, set, params, body }) => {
+    async ({ auth, set, params, body, requestId }) => {
       const result = await todoService.update(auth!.userId, params.id, body)
       if ('error' in result) {
         set.status = result.status
-        return { error: result.error }
+        return buildError({
+          requestId,
+          error: result.error,
+          code: result.code,
+        })
       }
       return result
     },
@@ -61,11 +67,15 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   )
   .delete(
     '/todos/:id',
-    async ({ auth, set, params }) => {
+    async ({ auth, set, params, requestId }) => {
       const result = await todoService.delete(auth!.userId, params.id)
       if ('error' in result) {
         set.status = result.status
-        return { error: result.error }
+        return buildError({
+          requestId,
+          error: result.error,
+          code: result.code,
+        })
       }
       return result
     },

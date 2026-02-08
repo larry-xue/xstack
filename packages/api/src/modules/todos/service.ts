@@ -17,8 +17,16 @@ const formatTodo = (todo: TodoEntity) => ({
 })
 
 type TodoResponse = ReturnType<typeof formatTodo>
-type TodoNotFound = { error: 'Todo not found'; status: 404 }
-type TodoBadRequest = { error: 'No updates provided'; status: 400 }
+type TodoNotFound = {
+  error: 'Todo not found'
+  code: 'TODO_NOT_FOUND'
+  status: 404
+}
+type TodoBadRequest = {
+  error: 'No updates provided'
+  code: 'NO_UPDATES'
+  status: 400
+}
 type UpdateResult = TodoResponse | TodoNotFound | TodoBadRequest
 type DeleteResult = { ok: true } | TodoNotFound
 
@@ -38,7 +46,11 @@ export const todoService = {
   ): Promise<UpdateResult> => {
     const existing = await todoRepo.findById(id, userId)
     if (!existing) {
-      return { error: 'Todo not found' as const, status: 404 as const }
+      return {
+        error: 'Todo not found' as const,
+        code: 'TODO_NOT_FOUND' as const,
+        status: 404 as const,
+      }
     }
 
     const update: { title?: string; isDone?: boolean } = {}
@@ -50,7 +62,11 @@ export const todoService = {
     }
 
     if (Object.keys(update).length === 0) {
-      return { error: 'No updates provided' as const, status: 400 as const }
+      return {
+        error: 'No updates provided' as const,
+        code: 'NO_UPDATES' as const,
+        status: 400 as const,
+      }
     }
 
     const todo = await todoRepo.update(existing.id, update)
@@ -59,7 +75,11 @@ export const todoService = {
   delete: async (userId: string, id: string): Promise<DeleteResult> => {
     const result = await todoRepo.deleteById(id, userId)
     if (result.count === 0) {
-      return { error: 'Todo not found' as const, status: 404 as const }
+      return {
+        error: 'Todo not found' as const,
+        code: 'TODO_NOT_FOUND' as const,
+        status: 404 as const,
+      }
     }
 
     return { ok: true as const }

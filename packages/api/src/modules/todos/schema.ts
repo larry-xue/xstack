@@ -8,10 +8,6 @@ export const todoResponse = t.Object({
   updatedAt: t.String(),
 })
 
-export const errorResponse = t.Object({
-  error: t.String(),
-})
-
 export const createTodoBody = t.Object({
   title: t.String({ minLength: 1, maxLength: 200 }),
 })

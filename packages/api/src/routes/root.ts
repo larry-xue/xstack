@@ -1,5 +1,4 @@
 import { Elysia, t } from 'elysia'
-
 export const rootRoutes = new Elysia()
   .get(
     '/',

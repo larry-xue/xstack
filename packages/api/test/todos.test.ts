@@ -30,7 +30,15 @@ describe('Todos API', () => {
     const response = await app.fetch(createRequest('/api/todos'))
 
     expect(response.status).toBe(401)
-    await expect(response.json()).resolves.toEqual({ error: 'Unauthorized' })
+    const body = (await response.json()) as {
+      error: string
+      code: string
+      requestId: string
+    }
+    expect(body.error).toBe('Unauthorized')
+    expect(body.code).toBe('UNAUTHORIZED')
+    expect(body.requestId).toBeTruthy()
+    expect(response.headers.get('x-request-id')).toBeTruthy()
   })
 
   test('CRUD flow works', async () => {
@@ -46,6 +54,7 @@ describe('Todos API', () => {
     const created = (await createResponse.json()) as { id: string; title: string; isDone: boolean }
     expect(created.title).toBe('First task')
     expect(created.isDone).toBe(false)
+    expect(createResponse.headers.get('x-request-id')).toBeTruthy()
 
     const listResponse = await app.fetch(await createAuthedRequest('/api/todos'))
     expect(listResponse.status).toBe(200)
@@ -61,6 +70,7 @@ describe('Todos API', () => {
       }),
     )
     expect(updateResponse.status).toBe(200)
+    expect(updateResponse.headers.get('x-request-id')).toBeTruthy()
     const updated = (await updateResponse.json()) as { title: string; isDone: boolean }
     expect(updated.title).toBe('Updated task')
     expect(updated.isDone).toBe(true)
@@ -71,6 +81,7 @@ describe('Todos API', () => {
       }),
     )
     expect(deleteResponse.status).toBe(200)
+    expect(deleteResponse.headers.get('x-request-id')).toBeTruthy()
     await expect(deleteResponse.json()).resolves.toEqual({ ok: true })
   })
 
@@ -93,7 +104,15 @@ describe('Todos API', () => {
     )
 
     expect(patchResponse.status).toBe(400)
-    await expect(patchResponse.json()).resolves.toEqual({ error: 'No updates provided' })
+    const patchBody = (await patchResponse.json()) as {
+      error: string
+      code: string
+      requestId: string
+    }
+    expect(patchBody.error).toBe('No updates provided')
+    expect(patchBody.code).toBe('NO_UPDATES')
+    expect(patchBody.requestId).toBeTruthy()
+    expect(patchResponse.headers.get('x-request-id')).toBeTruthy()
   })
 
   test('PATCH/DELETE 404 on missing todo', async () => {
@@ -105,7 +124,15 @@ describe('Todos API', () => {
       }),
     )
     expect(patchResponse.status).toBe(404)
-    await expect(patchResponse.json()).resolves.toEqual({ error: 'Todo not found' })
+    const missingPatch = (await patchResponse.json()) as {
+      error: string
+      code: string
+      requestId: string
+    }
+    expect(missingPatch.error).toBe('Todo not found')
+    expect(missingPatch.code).toBe('TODO_NOT_FOUND')
+    expect(missingPatch.requestId).toBeTruthy()
+    expect(patchResponse.headers.get('x-request-id')).toBeTruthy()
 
     const deleteResponse = await app.fetch(
       await createAuthedRequest('/api/todos/00000000-0000-4000-8000-000000000099', {
@@ -113,6 +140,14 @@ describe('Todos API', () => {
       }),
     )
     expect(deleteResponse.status).toBe(404)
-    await expect(deleteResponse.json()).resolves.toEqual({ error: 'Todo not found' })
+    const missingDelete = (await deleteResponse.json()) as {
+      error: string
+      code: string
+      requestId: string
+    }
+    expect(missingDelete.error).toBe('Todo not found')
+    expect(missingDelete.code).toBe('TODO_NOT_FOUND')
+    expect(missingDelete.requestId).toBeTruthy()
+    expect(deleteResponse.headers.get('x-request-id')).toBeTruthy()
   })
 })

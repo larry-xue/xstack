@@ -7,5 +7,6 @@ test('GET /health returns ok', async () => {
   const response = await app.fetch(new Request('http://localhost/health'))
 
   expect(response.status).toBe(200)
+  expect(response.headers.get('x-request-id')).toBeTruthy()
   await expect(response.json()).resolves.toEqual({ ok: true })
 })

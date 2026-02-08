@@ -64,7 +64,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   notFoundMode: 'fuzzy',
-  notFoundComponent: () => (
+  defaultNotFoundComponent: () => (
     <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
       <div className="card w-full text-center">
         <p className="text-sm font-semibold text-slate-500">404</p>
