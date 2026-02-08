@@ -1,11 +1,11 @@
 import { jwtVerify } from 'jose'
 
 type RuntimeEnv = Record<string, string | undefined>
-const runtimeEnv =
+const getRuntimeEnv = (): RuntimeEnv =>
   (globalThis as { process?: { env?: RuntimeEnv } }).process?.env ?? {}
 
 const getJwtSecret = () => {
-  const secret = runtimeEnv.SUPABASE_JWT_SECRET
+  const secret = getRuntimeEnv().SUPABASE_JWT_SECRET
   if (!secret) {
     throw new Error('SUPABASE_JWT_SECRET is required')
   }
@@ -13,7 +13,7 @@ const getJwtSecret = () => {
 }
 
 const getJwtIssuer = () => {
-  const issuer = runtimeEnv.SUPABASE_JWT_ISS
+  const issuer = getRuntimeEnv().SUPABASE_JWT_ISS
   return issuer && issuer.length > 0 ? issuer : undefined
 }
 

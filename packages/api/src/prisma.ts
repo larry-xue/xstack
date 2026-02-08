@@ -2,11 +2,11 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
 
 type RuntimeEnv = Record<string, string | undefined>
-const runtimeEnv =
+const getRuntimeEnv = (): RuntimeEnv =>
   (globalThis as { process?: { env?: RuntimeEnv } }).process?.env ?? {}
 
 const getDatabaseUrl = () => {
-  const url = runtimeEnv.DATABASE_URL
+  const url = getRuntimeEnv().DATABASE_URL
   if (!url) {
     throw new Error('DATABASE_URL is required')
   }
@@ -23,7 +23,7 @@ export const getPrisma = () => {
   const adapter = new PrismaPg({ connectionString: getDatabaseUrl() })
   const prisma = new PrismaClient({ adapter })
 
-  if (runtimeEnv.NODE_ENV !== 'production') {
+  if (getRuntimeEnv().NODE_ENV !== 'production') {
     globalForPrisma.prisma = prisma
   }
 

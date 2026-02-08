@@ -1,3 +1,4 @@
+import { AppError } from '../../schemas/error'
 import { todoRepo } from './repo'
 
 type TodoEntity = {
@@ -17,19 +18,6 @@ const formatTodo = (todo: TodoEntity) => ({
 })
 
 type TodoResponse = ReturnType<typeof formatTodo>
-type TodoNotFound = {
-  error: 'Todo not found'
-  code: 'TODO_NOT_FOUND'
-  status: 404
-}
-type TodoBadRequest = {
-  error: 'No updates provided'
-  code: 'NO_UPDATES'
-  status: 400
-}
-type UpdateResult = TodoResponse | TodoNotFound | TodoBadRequest
-type DeleteResult = { ok: true } | TodoNotFound
-
 export const todoService = {
   list: async (userId: string): Promise<TodoResponse[]> => {
     const todos = await todoRepo.listByUser(userId)
@@ -43,14 +31,14 @@ export const todoService = {
     userId: string,
     id: string,
     data: { title?: string; isDone?: boolean },
-  ): Promise<UpdateResult> => {
+  ): Promise<TodoResponse> => {
     const existing = await todoRepo.findById(id, userId)
     if (!existing) {
-      return {
-        error: 'Todo not found' as const,
-        code: 'TODO_NOT_FOUND' as const,
-        status: 404 as const,
-      }
+      throw new AppError({
+        code: 'TODO_NOT_FOUND',
+        status: 404,
+        message: 'Todo not found',
+      })
     }
 
     const update: { title?: string; isDone?: boolean } = {}
@@ -62,24 +50,24 @@ export const todoService = {
     }
 
     if (Object.keys(update).length === 0) {
-      return {
-        error: 'No updates provided' as const,
-        code: 'NO_UPDATES' as const,
-        status: 400 as const,
-      }
+      throw new AppError({
+        code: 'NO_UPDATES',
+        status: 400,
+        message: 'No updates provided',
+      })
     }
 
     const todo = await todoRepo.update(existing.id, update)
     return formatTodo(todo)
   },
-  delete: async (userId: string, id: string): Promise<DeleteResult> => {
+  delete: async (userId: string, id: string): Promise<{ ok: true }> => {
     const result = await todoRepo.deleteById(id, userId)
     if (result.count === 0) {
-      return {
-        error: 'Todo not found' as const,
-        code: 'TODO_NOT_FOUND' as const,
-        status: 404 as const,
-      }
+      throw new AppError({
+        code: 'TODO_NOT_FOUND',
+        status: 404,
+        message: 'Todo not found',
+      })
     }
 
     return { ok: true as const }

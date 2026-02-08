@@ -1,14 +1,13 @@
 import { Elysia, t } from 'elysia'
 import type { AuthContext } from '../../plugins/auth'
-import { buildError } from '../../schemas/error'
-import { todoService } from './service'
-import { createTodoBody, todoResponse, updateTodoBody } from './schema'
 import { errorResponse } from '../../schemas/error'
+import { createTodoBody, todoResponse, updateTodoBody } from './schema'
+import { todoService } from './service'
 
 type AuthSingleton = {
   decorator: {}
   store: {}
-  derive: { auth: AuthContext | null; requestId: string }
+  derive: { auth: AuthContext; requestId: string }
   resolve: {}
 }
 
@@ -16,7 +15,7 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   .get(
     '/todos',
     async ({ auth }) => {
-      return todoService.list(auth!.userId)
+      return todoService.list(auth.userId)
     },
     {
       response: {
@@ -28,7 +27,7 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   .post(
     '/todos',
     async ({ auth, body }) => {
-      return todoService.create(auth!.userId, body.title)
+      return todoService.create(auth.userId, body.title)
     },
     {
       body: createTodoBody,
@@ -40,17 +39,8 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   )
   .patch(
     '/todos/:id',
-    async ({ auth, set, params, body, requestId }) => {
-      const result = await todoService.update(auth!.userId, params.id, body)
-      if ('error' in result) {
-        set.status = result.status
-        return buildError({
-          requestId,
-          error: result.error,
-          code: result.code,
-        })
-      }
-      return result
+    async ({ auth, params, body }) => {
+      return todoService.update(auth.userId, params.id, body)
     },
     {
       params: t.Object({
@@ -67,17 +57,8 @@ export const todoRoutes = new Elysia<'', AuthSingleton>()
   )
   .delete(
     '/todos/:id',
-    async ({ auth, set, params, requestId }) => {
-      const result = await todoService.delete(auth!.userId, params.id)
-      if ('error' in result) {
-        set.status = result.status
-        return buildError({
-          requestId,
-          error: result.error,
-          code: result.code,
-        })
-      }
-      return result
+    async ({ auth, params }) => {
+      return todoService.delete(auth.userId, params.id)
     },
     {
       params: t.Object({

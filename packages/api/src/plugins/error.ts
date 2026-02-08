@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { buildError, type ErrorCode } from '../schemas/error'
+import { AppError, buildError, type ErrorCode } from '../schemas/error'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -32,20 +32,30 @@ type ErrorSingleton = {
 }
 
 export const errorPlugin = new Elysia<'', ErrorSingleton>().onError(
+  { as: 'global' },
   ({ code, error, set, requestId = 'unknown' }) => {
     if (!isProduction) {
       console.error(error)
     }
 
+    if (error instanceof AppError) {
+      set.status = error.status
+      return buildError({
+        requestId,
+        code: error.code,
+        error: error.message,
+      })
+    }
+
     const result = toErrorResult(code)
 
-  if (code === 'VALIDATION' || code === 'PARSE') {
-    set.status = 400
-  } else if (code === 'NOT_FOUND') {
-    set.status = 404
-  } else {
-    set.status = 500
-  }
+    if (code === 'VALIDATION' || code === 'PARSE') {
+      set.status = 400
+    } else if (code === 'NOT_FOUND') {
+      set.status = 404
+    } else {
+      set.status = 500
+    }
 
     return buildError({
       requestId,

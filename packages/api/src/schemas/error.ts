@@ -27,3 +27,18 @@ export const buildError = (params: {
   code: params.code,
   requestId: params.requestId,
 })
+
+export class AppError extends Error {
+  readonly code: ErrorCode
+  readonly status: number
+
+  constructor(params: { code: ErrorCode; status: number; message: string }) {
+    super(params.message)
+    this.code = params.code
+    this.status = params.status
+    this.name = 'AppError'
+  }
+}
+
+export const isAppError = (error: unknown): error is AppError =>
+  error instanceof AppError

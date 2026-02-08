@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { buildError } from '../schemas/error'
+import { AppError } from '../schemas/error'
 import {
   getBearerToken,
   verifySupabaseJwt,
@@ -29,19 +29,20 @@ export const authPlugin = new Elysia()
 type AuthGuardSingleton = {
   decorator: {}
   store: {}
-  derive: { auth: AuthContext | null; requestId: string }
+  derive: { auth: AuthContext; requestId: string }
   resolve: {}
 }
 
 export const authGuard = new Elysia<'', AuthGuardSingleton>()
   .use(authPlugin)
-  .onBeforeHandle(({ auth, set, requestId = 'unknown' }) => {
+  .resolve({ as: 'scoped' }, ({ auth }) => {
     if (!auth) {
-      set.status = 401
-      return buildError({
-        error: 'Unauthorized',
+      throw new AppError({
         code: 'UNAUTHORIZED',
-        requestId,
+        status: 401,
+        message: 'Unauthorized',
       })
     }
+
+    return { auth }
   })
