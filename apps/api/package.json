@@ -1,42 +1,29 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "This project was bootstrapped with Fastify-CLI.",
+  "description": "Elysia API",
   "keywords": [],
   "license": "ISC",
   "author": "",
-  "directories": {
-    "test": "test"
-  },
-  "main": "app.ts",
+  "main": "dist/server.js",
   "scripts": {
-    "test": "pnpm build:ts && tsc -p test/tsconfig.json --noEmit && vitest run --coverage",
-    "start": "pnpm build:ts && fastify start -l info dist/app.js",
     "build:ts": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc",
     "watch:ts": "tsc -w",
-    "lint": "pnpm -w lint",
-    "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "dev:start": "node --watch dist/server.js",
     "dev": "pnpm build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+    "start": "pnpm build:ts && node dist/server.js",
+    "test": "pnpm build:ts && tsc -p test/tsconfig.json --noEmit && vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fastify/autoload": "^6.0.0",
-    "@fastify/sensible": "^6.0.0",
-    "@repo/contracts": "workspace:*",
-    "@supabase/supabase-js": "^2.95.3",
-    "@ts-rest/fastify": "^3.52.1",
-    "fastify": "^5.0.0",
-    "fastify-cli": "^7.4.1",
-    "fastify-plugin": "^5.0.0"
+    "@elysiajs/node": "latest",
+    "@elysiajs/openapi": "^1.4.14",
+    "elysia": "latest"
   },
   "devDependencies": {
     "@types/node": "^24.0.8",
-    "@vitest/coverage-v8": "latest",
-    "c8": "^10.1.2",
     "concurrently": "^9.0.0",
-    "fastify-tsconfig": "^3.0.0",
-    "ts-node": "^10.4.0",
-    "typescript": "~5.9.2",
+    "typescript": "~5.9.3",
     "vitest": "latest"
   }
 }

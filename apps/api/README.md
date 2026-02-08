@@ -1,24 +1,12 @@
-# Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
+# API (Elysia)
 
-This project was bootstrapped with Fastify-CLI.
+## Scripts
 
-## Available Scripts
+- `pnpm -C apps/api dev` ¨C start TypeScript watch + Node --watch
+- `pnpm -C apps/api start` ¨C build and run production server
+- `pnpm -C apps/api test` ¨C run tests
 
-In the project directory, you can run:
+## Endpoints
 
-### `pnpm dev`
-
-To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-### `npm start`
-
-For production mode
-
-### `pnpm test`
-
-Run the test cases.
-
-## Learn More
-
-To learn Fastify, check out the [Fastify documentation](https://fastify.dev/docs/latest/).
+- `GET /` returns `{ service: "api", status: "ok" }`
+- `GET /health` returns `{ ok: true }`

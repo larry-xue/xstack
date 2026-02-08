@@ -1,33 +1,14 @@
-import { join } from 'node:path'
-import AutoLoad, { AutoloadPluginOptions } from '@fastify/autoload'
-import { FastifyPluginAsync, FastifyServerOptions } from 'fastify'
+import { Elysia } from 'elysia'
+import { node } from '@elysiajs/node'
+import { openapi } from '@elysiajs/openapi'
 
-export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
-// Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {}
+export const createApp = () => {
+  const app = new Elysia({ adapter: node() })
+    .use(openapi())
+    .get('/', () => ({ service: 'api', status: 'ok' }))
+    .get('/health', () => ({ ok: true }))
 
-const app: FastifyPluginAsync<AppOptions> = async (fastify, opts): Promise<void> => {
-  // Place here your custom code!
-
-  // Do not touch the following lines
-
-  // This loads all plugins defined in server/plugins
-  // those should be support plugins that are reused
-  // through your application
-  // eslint-disable-next-line no-void
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'server', 'plugins'),
-    options: opts,
-  })
-
-  // This loads all modules defined in server/modules
-  // define your routes in one of these
-  // eslint-disable-next-line no-void
-  void fastify.register(AutoLoad, {
-    dir: join(__dirname, 'server', 'modules'),
-    options: opts,
-  })
+  return app
 }
 
-export default app
-export { app, options }
+export type App = ReturnType<typeof createApp>
