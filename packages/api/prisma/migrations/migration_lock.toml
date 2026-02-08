@@ -1,0 +1,4 @@
+# Prisma Migrate lockfile
+# This file is created and maintained by Prisma Migrate.
+
+provider = "postgresql"

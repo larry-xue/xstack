@@ -1,5 +1,9 @@
 import { node } from '@elysiajs/node'
-import { createApp } from '@repo/api'
+import { config as loadEnv } from 'dotenv'
+
+loadEnv({ path: '.env.local', quiet: true })
+
+const { createApp } = await import('@repo/api')
 
 const port = Number(process.env.PORT ?? 54545)
 const hostname = '0.0.0.0'
