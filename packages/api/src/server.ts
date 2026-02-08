@@ -3,7 +3,7 @@ import { config as loadEnv } from 'dotenv'
 
 loadEnv({ path: '.env.local', quiet: true })
 
-const { createApp } = await import('@repo/api')
+const { createApp } = await import('./app.js')
 
 const port = Number(process.env.PORT ?? 54545)
 const hostname = '0.0.0.0'

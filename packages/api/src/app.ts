@@ -1,7 +1,7 @@
 import { openapi } from '@elysiajs/openapi'
 import { Elysia, t } from 'elysia'
 import { getBearerToken, verifySupabaseJwt } from './auth.js'
-import { prisma } from './prisma.js'
+import { disconnectPrisma, getPrisma } from './prisma.js'
 
 type ElysiaOptions = NonNullable<ConstructorParameters<typeof Elysia>[0]>
 type CreateAppOptions = Pick<ElysiaOptions, 'adapter'>
@@ -51,10 +51,9 @@ const authGuard = new Elysia()
 
 export const createApp = (options?: CreateAppOptions) =>
   new Elysia(options)
-    .decorate('prisma', prisma)
     .use(openapi())
     .onStop(async () => {
-      await prisma.$disconnect()
+      await disconnectPrisma()
     })
     .get(
       '/',
@@ -84,8 +83,8 @@ export const createApp = (options?: CreateAppOptions) =>
         .use(authGuard)
         .get(
           '/todos',
-          async ({ prisma, auth }) => {
-            const todos = await prisma.todo.findMany({
+          async ({ auth }) => {
+            const todos = await getPrisma().todo.findMany({
               where: { userId: auth!.userId },
               orderBy: { createdAt: 'desc' },
             })
@@ -100,8 +99,8 @@ export const createApp = (options?: CreateAppOptions) =>
         )
         .post(
           '/todos',
-          async ({ prisma, auth, body }) => {
-            const todo = await prisma.todo.create({
+          async ({ auth, body }) => {
+            const todo = await getPrisma().todo.create({
               data: {
                 userId: auth!.userId,
                 title: body.title,
