@@ -13,6 +13,9 @@ const todoResponse = t.Object({
   createdAt: t.String(),
   updatedAt: t.String(),
 })
+const errorResponse = t.Object({
+  error: t.String(),
+})
 
 const formatTodo = (todo: {
   id: string
@@ -115,6 +118,80 @@ export const createApp = (options?: CreateAppOptions) =>
             }),
             response: {
               200: todoResponse,
+            },
+          },
+        )
+        .patch(
+          '/todos/:id',
+          async ({ auth, params, body, set }) => {
+            const existing = await getPrisma().todo.findFirst({
+              where: { id: params.id, userId: auth!.userId },
+            })
+
+            if (!existing) {
+              set.status = 404
+              return { error: 'Todo not found' }
+            }
+
+            const update: { title?: string; isDone?: boolean; updatedAt?: Date } =
+              {}
+            if (typeof body.title === 'string') {
+              update.title = body.title
+            }
+            if (typeof body.isDone === 'boolean') {
+              update.isDone = body.isDone
+            }
+
+            if (Object.keys(update).length === 0) {
+              set.status = 400
+              return { error: 'No updates provided' }
+            }
+
+            update.updatedAt = new Date()
+
+            const todo = await getPrisma().todo.update({
+              where: { id: existing.id },
+              data: update,
+            })
+
+            return formatTodo(todo)
+          },
+          {
+            params: t.Object({
+              id: t.String(),
+            }),
+            body: t.Object({
+              title: t.Optional(t.String({ minLength: 1, maxLength: 200 })),
+              isDone: t.Optional(t.Boolean()),
+            }),
+            response: {
+              200: todoResponse,
+              400: errorResponse,
+              404: errorResponse,
+            },
+          },
+        )
+        .delete(
+          '/todos/:id',
+          async ({ auth, params, set }) => {
+            const result = await getPrisma().todo.deleteMany({
+              where: { id: params.id, userId: auth!.userId },
+            })
+
+            if (result.count === 0) {
+              set.status = 404
+              return { error: 'Todo not found' }
+            }
+
+            return { ok: true }
+          },
+          {
+            params: t.Object({
+              id: t.String(),
+            }),
+            response: {
+              200: t.Object({ ok: t.Literal(true) }),
+              404: errorResponse,
             },
           },
         ),
