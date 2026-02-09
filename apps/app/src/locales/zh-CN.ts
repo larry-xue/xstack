@@ -1,6 +1,7 @@
 const zhCN = {
   common: {
     language: '语言',
+    theme: '主题',
     languages: {
       en: 'English',
       zhCN: '简体中文',
@@ -19,11 +20,11 @@ const zhCN = {
       badge: '起步模板',
       title: '快速构建，内置安全认证与受保护路由。',
       description:
-        '这个模板包含 Supabase 认证、TanStack Router 路由守卫，以及已接好 API 的 Todo 全 CRUD 示例。',
+        '这个模板包含 Supabase 认证、TanStack Router 路由守卫，以及已连接 API 的 Todo 全流程 CRUD 示例。',
       tags: {
         auth: 'Supabase 认证',
         router: 'TanStack Router',
-        styles: 'Tailwind CSS',
+        styles: 'shadcn/ui + Tailwind',
       },
     },
     panel: {
@@ -39,16 +40,37 @@ const zhCN = {
       submitSignup: '创建账户',
       policy: '继续即表示你同意该起步模板的相关政策。',
       signupNotice: '请先前往邮箱完成账户确认，再进行登录。',
+      errorTitle: '认证失败',
+      noticeTitle: '提示',
     },
   },
   authenticatedLayout: {
     brand: 'XStack 模板',
-    title: '已认证工作区',
-    signedIn: '已登录',
+    title: '项目工作区',
+    subtitle: 'SaaS 控制台',
+    navigation: '导航',
+    signedIn: '当前账号',
     signOut: '退出登录',
-    todos: '待办',
-    routeHint: '受保护路由示例',
     loadingSession: '正在加载会话...',
+    searchPlaceholder: '搜索项目...',
+    addNew: '新建...',
+    openNavigation: '打开导航',
+    notifications: '通知',
+    filter: '筛选',
+    gridView: '网格视图',
+    nav: {
+      overview: '概览',
+      projects: '项目',
+      deployments: '部署',
+      analytics: '分析',
+      observability: '可观测性',
+      domains: '域名',
+      integrations: '集成',
+      aiGateway: 'AI 网关',
+      sandboxes: '沙箱',
+      todos: '待办',
+      live: '在线',
+    },
   },
   todosPage: {
     section: {
@@ -65,6 +87,7 @@ const zhCN = {
       updateFailed: '更新待办失败',
       deleteFailed: '删除待办失败',
       loadFailed: '加载待办失败',
+      actionFailed: '待办操作失败',
     },
     list: {
       title: '你的任务',

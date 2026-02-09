@@ -15,7 +15,7 @@ const createCredentials = (): Credentials => {
 
 const signUp = async (page: Page, credentials: Credentials) => {
   await page.goto('/auth')
-  await page.getByRole('button', { name: 'Sign up' }).click()
+  await page.getByRole('radio', { name: 'Sign up' }).click()
   await page.getByLabel('Email address').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Create account' }).click()
@@ -67,5 +67,32 @@ test.describe('auth and todos', () => {
     const updatedItem = page.locator('li', { hasText: updatedTitle })
     await updatedItem.getByRole('button', { name: 'Delete' }).click()
     await expect(updatedItem).toHaveCount(0)
+  })
+
+  test('keeps selected theme after authentication', async ({ page }) => {
+    const credentials = createCredentials()
+
+    await page.goto('/auth')
+
+    const themeSwitch = page.getByRole('switch', { name: 'Theme' })
+    await expect(themeSwitch).toBeVisible()
+    const startedDark = await page.evaluate(() =>
+      document.documentElement.classList.contains('dark'),
+    )
+    await themeSwitch.click()
+
+    const expectedTheme = startedDark ? 'light' : 'dark'
+    const expectedDark = !startedDark
+
+    await signUp(page, credentials)
+
+    await expect
+      .poll(async () =>
+        page.evaluate(() => document.documentElement.classList.contains('dark')),
+      )
+      .toBe(expectedDark)
+    await expect
+      .poll(async () => page.evaluate(() => window.localStorage.getItem('theme')))
+      .toBe(expectedTheme)
   })
 })

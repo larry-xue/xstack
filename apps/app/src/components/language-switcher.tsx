@@ -5,10 +5,10 @@ const LanguageSwitcher = ({ className = '' }: { className?: string }) => {
   const currentLanguage = i18n.resolvedLanguage?.startsWith('zh') ? 'zh-CN' : 'en'
 
   return (
-    <label className={`inline-flex items-center gap-2 text-xs text-slate-600 ${className}`}>
+    <label className={`inline-flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
       <span className="font-semibold">{t('common.language')}</span>
       <select
-        className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+        className="rounded-lg border border-border bg-card px-2 py-1 text-xs font-semibold text-foreground shadow-xs outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/40"
         value={currentLanguage}
         onChange={(event) => {
           i18n.changeLanguage(event.target.value)

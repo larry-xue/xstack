@@ -1,6 +1,7 @@
 const en = {
   common: {
     language: 'Language',
+    theme: 'Theme',
     languages: {
       en: 'English',
       zhCN: 'Chinese (Simplified)',
@@ -23,7 +24,7 @@ const en = {
       tags: {
         auth: 'Supabase Auth',
         router: 'TanStack Router',
-        styles: 'Tailwind CSS',
+        styles: 'shadcn/ui + Tailwind',
       },
     },
     panel: {
@@ -39,16 +40,37 @@ const en = {
       submitSignup: 'Create account',
       policy: 'By continuing you agree to the starter template policies.',
       signupNotice: 'Check your email to confirm your account before signing in.',
+      errorTitle: 'Authentication failed',
+      noticeTitle: 'Heads up',
     },
   },
   authenticatedLayout: {
     brand: 'XStack Starter',
-    title: 'Authenticated workspace',
+    title: 'Project Workspace',
+    subtitle: 'SaaS Dashboard',
+    navigation: 'Navigation',
     signedIn: 'Signed in',
     signOut: 'Sign out',
-    todos: 'Todos',
-    routeHint: 'Protected route example',
     loadingSession: 'Loading session...',
+    searchPlaceholder: 'Search projects...',
+    addNew: 'Add New...',
+    openNavigation: 'Open navigation',
+    notifications: 'Notifications',
+    filter: 'Filter',
+    gridView: 'Grid view',
+    nav: {
+      overview: 'Overview',
+      projects: 'Projects',
+      deployments: 'Deployments',
+      analytics: 'Analytics',
+      observability: 'Observability',
+      domains: 'Domains',
+      integrations: 'Integrations',
+      aiGateway: 'AI Gateway',
+      sandboxes: 'Sandboxes',
+      todos: 'Todos',
+      live: 'Live',
+    },
   },
   todosPage: {
     section: {
@@ -65,6 +87,7 @@ const en = {
       updateFailed: 'Failed to update todo',
       deleteFailed: 'Failed to delete todo',
       loadFailed: 'Failed to load todos',
+      actionFailed: 'Todo action failed',
     },
     list: {
       title: 'Your tasks',

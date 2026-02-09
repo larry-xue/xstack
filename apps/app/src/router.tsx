@@ -4,6 +4,7 @@ import {
   createRouter,
   redirect,
 } from '@tanstack/react-router'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import App from './App'
 import AuthPage from './routes/auth-page'
 import TodosPage from './routes/todos-page'
@@ -16,13 +17,15 @@ const NotFoundPage = () => {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-      <div className="card w-full text-center">
-        <p className="text-sm font-semibold text-slate-500">{t('router.notFound.code')}</p>
-        <h1 className="mt-2 font-display text-2xl text-slate-900">
-          {t('router.notFound.title')}
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">{t('router.notFound.description')}</p>
-      </div>
+      <Card className="w-full border-border/80 bg-card/85 text-center">
+        <CardHeader>
+          <p className="text-sm font-semibold text-muted-foreground">{t('router.notFound.code')}</p>
+          <CardTitle className="mt-1 font-display text-2xl">{t('router.notFound.title')}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          {t('router.notFound.description')}
+        </CardContent>
+      </Card>
     </div>
   )
 }

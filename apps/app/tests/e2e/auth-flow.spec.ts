@@ -14,7 +14,7 @@ test.describe('auth entry flow', () => {
     await expect(page.getByLabel('Email address')).toBeVisible()
     await expect(page.getByLabel('Password')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Sign up' })).toBeVisible()
+    await expect(page.getByRole('radio', { name: 'Sign up' })).toBeVisible()
   })
 
   test('switches language and syncs selection state', async ({ page }) => {
@@ -30,5 +30,37 @@ test.describe('auth entry flow', () => {
     await expect
       .poll(async () => page.evaluate(() => window.localStorage.getItem('lang')))
       .toBe('zh-CN')
+  })
+
+  test('toggles theme and persists after reload', async ({ page }) => {
+    await page.goto('/auth')
+
+    const themeSwitch = page.getByRole('switch', { name: 'Theme' })
+    await expect(themeSwitch).toBeVisible()
+    const startedDark = await page.evaluate(() =>
+      document.documentElement.classList.contains('dark'),
+    )
+
+    await themeSwitch.click()
+
+    const expectedTheme = startedDark ? 'light' : 'dark'
+    const expectedDark = !startedDark
+
+    await expect
+      .poll(async () =>
+        page.evaluate(() => document.documentElement.classList.contains('dark')),
+      )
+      .toBe(expectedDark)
+    await expect
+      .poll(async () => page.evaluate(() => window.localStorage.getItem('theme')))
+      .toBe(expectedTheme)
+
+    await page.reload()
+
+    await expect
+      .poll(async () =>
+        page.evaluate(() => document.documentElement.classList.contains('dark')),
+      )
+      .toBe(expectedDark)
   })
 })
