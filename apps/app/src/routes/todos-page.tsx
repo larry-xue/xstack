@@ -2,7 +2,6 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -106,91 +105,70 @@ const TodosPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="motion-safe:animate-fade-up border-border/80 bg-card/85 shadow-soft-md backdrop-blur">
-        <CardHeader className="gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">{t('todosPage.section.badge')}</p>
-              <CardTitle className="mt-1 font-display text-2xl">{t('todosPage.section.title')}</CardTitle>
-            </div>
-            <Badge variant="outline">{t('todosPage.section.apiBadge')}</Badge>
-          </div>
+    <Card className="border-border/80 bg-card/90">
+      <CardHeader className="gap-4">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="font-display text-2xl">{t('todosPage.section.title')}</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            {t('todosPage.list.itemsCount', { count: todos.length })}
+          </p>
+        </div>
+        <form className="flex flex-col gap-3 sm:flex-row" onSubmit={submitNewTodo}>
+          <Input
+            className="sm:flex-1"
+            placeholder={t('todosPage.form.placeholder')}
+            value={newTitle}
+            onChange={(event) => setNewTitle(event.target.value)}
+            minLength={1}
+            maxLength={200}
+            required
+            disabled={isWorking}
+          />
+          <Button type="submit" disabled={isWorking}>
+            {t('todosPage.form.submit')}
+          </Button>
+        </form>
+      </CardHeader>
 
-          <form className="flex flex-col gap-3 sm:flex-row" onSubmit={submitNewTodo}>
-            <Input
-              className="sm:flex-1"
-              placeholder={t('todosPage.form.placeholder')}
-              value={newTitle}
-              onChange={(event) => setNewTitle(event.target.value)}
-              minLength={1}
-              maxLength={200}
-              required
-              disabled={isWorking}
-            />
-            <Button type="submit" disabled={isWorking}>
-              {t('todosPage.form.submit')}
-            </Button>
-          </form>
-        </CardHeader>
-
+      <CardContent className="space-y-4">
         {actionError && (
-          <CardContent className="pt-0">
-            <Alert variant="destructive">
-              <AlertTitle>{t('todosPage.errors.actionFailed')}</AlertTitle>
-              <AlertDescription>{actionError}</AlertDescription>
-            </Alert>
-          </CardContent>
+          <Alert variant="destructive">
+            <AlertTitle>{t('todosPage.errors.actionFailed')}</AlertTitle>
+            <AlertDescription>{actionError}</AlertDescription>
+          </Alert>
         )}
-      </Card>
 
-      <Card className="border-border/75 bg-card/75">
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-muted-foreground">{t('todosPage.list.title')}</p>
-            <p className="text-xs text-muted-foreground">
-              {t('todosPage.list.itemsCount', { count: todos.length })}
-            </p>
+        {isLoading && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t('todosPage.list.loading')}</p>
+            <Skeleton className="h-14 w-full rounded-lg" />
+            <Skeleton className="h-14 w-full rounded-lg" />
+            <Skeleton className="h-14 w-full rounded-lg" />
           </div>
-        </CardHeader>
+        )}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertTitle>{t('todosPage.errors.loadFailed')}</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error ? error.message : t('todosPage.errors.loadFailed')}
+            </AlertDescription>
+          </Alert>
+        )}
 
-        <CardContent>
-          {isLoading && (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">{t('todosPage.list.loading')}</p>
-              <Skeleton className="h-16 w-full rounded-xl" />
-              <Skeleton className="h-16 w-full rounded-xl" />
-              <Skeleton className="h-16 w-full rounded-xl" />
-            </div>
-          )}
-          {isError && (
-            <Alert variant="destructive">
-              <AlertTitle>{t('todosPage.errors.loadFailed')}</AlertTitle>
-              <AlertDescription>
-                {error instanceof Error ? error.message : t('todosPage.errors.loadFailed')}
-              </AlertDescription>
-            </Alert>
-          )}
+        {!isLoading && !isError && todos.length === 0 && (
+          <p className="text-sm text-muted-foreground">{t('todosPage.list.empty')}</p>
+        )}
 
-          {!isLoading && !isError && todos.length === 0 && (
-            <div className="rounded-xl border border-dashed border-border/80 bg-muted/25 p-6 text-sm text-muted-foreground">
-              {t('todosPage.list.empty')}
-            </div>
-          )}
-
-          <ul className="space-y-3">
+        <ul>
           {todos.map((todo) => {
             const isEditing = editingId === todo.id
             return (
-              <li
-                key={todo.id}
-                className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-background/70 px-4 py-3 shadow-xs"
-              >
+              <li key={todo.id} className="border-b border-border/60 py-3 last:border-b-0">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <Button
                       variant={todo.isDone ? 'secondary' : 'outline'}
-                      className={`h-11 min-w-11 text-sm font-semibold ${
+                      className={`h-10 min-w-10 text-xs font-semibold ${
                         todo.isDone
                           ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
                           : ''
@@ -242,7 +220,7 @@ const TodosPage = () => {
                 </div>
 
                 {isEditing && (
-                  <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/30 px-3 py-3 sm:flex-row sm:items-center">
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Input
                       className="flex-1"
                       value={editingTitle}
@@ -272,10 +250,9 @@ const TodosPage = () => {
               </li>
             )
           })}
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+        </ul>
+      </CardContent>
+    </Card>
   )
 }
 

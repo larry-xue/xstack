@@ -16,12 +16,12 @@ const ThemeToggle = ({ className = '' }: { className?: string }) => {
   const isDark = mounted && resolvedTheme === 'dark'
 
   return (
-    <div className={`inline-flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
-      <span className="font-semibold">{t('common.theme')}</span>
+    <div className={`inline-flex items-center text-xs text-muted-foreground ${className}`}>
       <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/85 px-2 py-1 shadow-xs backdrop-blur">
         <Sun className={`size-3.5 ${isDark ? 'text-muted-foreground/70' : 'text-amber-500'}`} />
         <Switch
           aria-label={t('common.theme')}
+          title={t('common.theme')}
           checked={isDark}
           onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
         />
@@ -32,4 +32,3 @@ const ThemeToggle = ({ className = '' }: { className?: string }) => {
 }
 
 export default ThemeToggle
-

@@ -95,4 +95,42 @@ test.describe('auth and todos', () => {
       .poll(async () => page.evaluate(() => window.localStorage.getItem('theme')))
       .toBe(expectedTheme)
   })
+
+  test('renders full-bleed app shell and sidebar footer controls', async ({ page }) => {
+    const credentials = createCredentials()
+    await signUp(page, credentials)
+
+    const shell = page.getByTestId('app-shell-root')
+    await expect(shell).toBeVisible()
+    await expect(page.getByRole('switch', { name: 'Theme' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+
+    const viewport = page.viewportSize()
+    if (!viewport) {
+      throw new Error('Viewport size is unavailable')
+    }
+
+    const rect = await shell.evaluate((node) => {
+      const { x, y, width, height } = node.getBoundingClientRect()
+      return { x, y, width, height }
+    })
+
+    expect(rect.x).toBe(0)
+    expect(rect.y).toBe(0)
+    expect(Math.abs(rect.width - viewport.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(rect.height - viewport.height)).toBeLessThanOrEqual(1)
+  })
+
+  test('keeps mobile sidebar drawer interaction', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    const credentials = createCredentials()
+    await signUp(page, credentials)
+
+    const openNavButton = page.getByRole('button', { name: 'Open navigation' })
+    await expect(openNavButton).toBeVisible()
+    await openNavButton.click()
+
+    await expect(page.getByRole('link', { name: 'Todos' })).toBeVisible()
+  })
 })

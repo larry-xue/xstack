@@ -1,3 +1,4 @@
+import { Languages } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 const LanguageSwitcher = ({ className = '' }: { className?: string }) => {
@@ -6,8 +7,10 @@ const LanguageSwitcher = ({ className = '' }: { className?: string }) => {
 
   return (
     <label className={`inline-flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
-      <span className="font-semibold">{t('common.language')}</span>
+      <Languages className="size-3.5 text-muted-foreground/80" aria-hidden />
       <select
+        aria-label={t('common.language')}
+        title={t('common.language')}
         className="rounded-lg border border-border bg-card px-2 py-1 text-xs font-semibold text-foreground shadow-xs outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/40"
         value={currentLanguage}
         onChange={(event) => {

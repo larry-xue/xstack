@@ -12,10 +12,11 @@ import {
   Server,
   ShieldCheck,
   Store,
+  UserRound,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import AppHeader from '@/components/layout/app-header'
-import AppSidebar, { type AppSidebarItem } from '@/components/layout/app-sidebar'
+import AppShell, { type AppShellSlots } from '@/components/layout/app-shell'
+import AppSidebar, { SidebarNavList, type AppSidebarItem } from '@/components/layout/app-sidebar'
 import LanguageSwitcher from '@/components/language-switcher'
 import ThemeToggle from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -97,79 +98,92 @@ const AuthenticatedLayout = () => {
   const sidebarSubtitle = t('authenticatedLayout.brand')
   const sidebarSection = t('authenticatedLayout.navigation')
 
-  return (
-    <div className="mx-auto min-h-screen w-full max-w-[1480px] p-3 sm:p-4">
-      <div className="flex min-h-[calc(100vh-1.5rem)] overflow-hidden rounded-2xl border border-border/70 bg-card/75 shadow-soft-md backdrop-blur">
-        <div className="hidden w-72 shrink-0 lg:block">
+  const renderSidebarNav = () => (
+    <>
+      <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
+        {sidebarSection}
+      </p>
+      <SidebarNavList items={navItems} />
+    </>
+  )
+
+  const renderSidebarFooter = () => (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2">
+        <ThemeToggle />
+        <LanguageSwitcher />
+      </div>
+      <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/35 p-3">
+        <div className="flex items-center gap-2">
+          <UserRound className="size-4 text-sidebar-foreground/70" aria-hidden />
+          <p className="truncate text-sm font-semibold text-sidebar-foreground">
+            {session?.user.email ?? t('common.loading')}
+          </p>
+        </div>
+        <Button className="mt-3 w-full" variant="outline" onClick={handleSignOut}>
+          {t('authenticatedLayout.signOut')}
+        </Button>
+      </div>
+    </div>
+  )
+
+  const appShellSlots: AppShellSlots = {
+    sidebarNav: renderSidebarNav(),
+    sidebarFooter: renderSidebarFooter(),
+    headerStart: (
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="lg:hidden"
+            aria-label={t('authenticatedLayout.openNavigation')}
+          >
+            <Menu className="size-4" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-72 p-0">
+          <SheetHeader className="sr-only">
+            <SheetTitle>{sidebarTitle}</SheetTitle>
+            <SheetDescription>{t('authenticatedLayout.openNavigation')}</SheetDescription>
+          </SheetHeader>
           <AppSidebar
             title={sidebarTitle}
             subtitle={sidebarSubtitle}
             sectionLabel={sidebarSection}
             items={navItems}
+            navSlot={renderSidebarNav()}
+            footerSlot={renderSidebarFooter()}
+            className="border-0"
           />
-        </div>
+        </SheetContent>
+      </Sheet>
+    ),
+  }
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <AppHeader
-            title={t('authenticatedLayout.title')}
-            subtitle={t('authenticatedLayout.subtitle')}
-            searchPlaceholder={t('authenticatedLayout.searchPlaceholder')}
-            signedInLabel={t('authenticatedLayout.signedIn')}
-            userEmail={session?.user.email ?? t('common.loading')}
-            signOutLabel={t('authenticatedLayout.signOut')}
-            primaryActionLabel={t('authenticatedLayout.addNew')}
-            notificationsLabel={t('authenticatedLayout.notifications')}
-            filterLabel={t('authenticatedLayout.filter')}
-            gridViewLabel={t('authenticatedLayout.gridView')}
-            onSignOut={handleSignOut}
-            leftSlot={
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    className="lg:hidden"
-                    aria-label={t('authenticatedLayout.openNavigation')}
-                  >
-                    <Menu className="size-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72 p-0">
-                  <SheetHeader className="sr-only">
-                    <SheetTitle>{sidebarTitle}</SheetTitle>
-                    <SheetDescription>{t('authenticatedLayout.openNavigation')}</SheetDescription>
-                  </SheetHeader>
-                  <AppSidebar
-                    title={sidebarTitle}
-                    subtitle={sidebarSubtitle}
-                    sectionLabel={sidebarSection}
-                    items={navItems}
-                    className="border-0"
-                  />
-                </SheetContent>
-              </Sheet>
-            }
-          />
-
-          <div className="flex items-center justify-end gap-3 border-b border-border/70 px-4 py-2.5 sm:px-6">
-            <ThemeToggle />
-            <LanguageSwitcher />
-          </div>
-
-          <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
-            {isLoading ? (
-              <Card>
-                <CardContent className="py-6 text-sm text-muted-foreground">
-                  {t('authenticatedLayout.loadingSession')}
-                </CardContent>
-              </Card>
-            ) : (
-              <Outlet />
-            )}
-          </main>
-        </div>
-      </div>
-    </div>
+  return (
+    <AppShell
+      sidebar={{
+        title: sidebarTitle,
+        subtitle: sidebarSubtitle,
+        sectionLabel: sidebarSection,
+        items: navItems,
+      }}
+      header={{
+        title: t('authenticatedLayout.nav.todos'),
+      }}
+      slots={appShellSlots}
+    >
+      {isLoading ? (
+        <Card>
+          <CardContent className="py-6 text-sm text-muted-foreground">
+            {t('authenticatedLayout.loadingSession')}
+          </CardContent>
+        </Card>
+      ) : (
+        <Outlet />
+      )}
+    </AppShell>
   )
 }
 

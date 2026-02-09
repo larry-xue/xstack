@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -79,11 +80,14 @@ export const SidebarNavList = ({ items }: SidebarNavListProps) => {
   )
 }
 
-type AppSidebarProps = {
+export type AppSidebarProps = {
   title: string
   subtitle: string
   sectionLabel: string
   items: AppSidebarItem[]
+  headerSlot?: ReactNode
+  navSlot?: ReactNode
+  footerSlot?: ReactNode
   className?: string
 }
 
@@ -92,6 +96,9 @@ const AppSidebar = ({
   subtitle,
   sectionLabel,
   items,
+  headerSlot,
+  navSlot,
+  footerSlot,
   className = '',
 }: AppSidebarProps) => {
   return (
@@ -101,22 +108,35 @@ const AppSidebar = ({
         className,
       )}
     >
-      <div className="border-b border-sidebar-border px-4 py-4">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">
-          {subtitle}
-        </p>
-        <h1 className="mt-1 font-display text-lg text-sidebar-foreground">{title}</h1>
-      </div>
+      {headerSlot ? (
+        <div className="border-b border-sidebar-border px-4 py-4">{headerSlot}</div>
+      ) : (
+        <div className="border-b border-sidebar-border px-4 py-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">
+            {subtitle}
+          </p>
+          <h1 className="mt-1 font-display text-lg text-sidebar-foreground">{title}</h1>
+        </div>
+      )}
 
       <div className="flex-1 px-3 py-4">
-        <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
-          {sectionLabel}
-        </p>
-        <SidebarNavList items={items} />
+        {navSlot ? (
+          navSlot
+        ) : (
+          <>
+            <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
+              {sectionLabel}
+            </p>
+            <SidebarNavList items={items} />
+          </>
+        )}
       </div>
+
+      {footerSlot && (
+        <div className="border-t border-sidebar-border px-3 py-4">{footerSlot}</div>
+      )}
     </aside>
   )
 }
 
 export default AppSidebar
-
