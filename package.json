@@ -8,6 +8,9 @@
   "main": "index.js",
   "scripts": {
     "test": "turbo test",
+    "test:e2e": "playwright test",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "test:e2e:ui": "playwright test --ui",
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "oxlint --config .oxlintrc.json --react-plugin --node-plugin .",
@@ -17,6 +20,8 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.2.2",
     "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
     "supabase": "^2.75.5",
