@@ -8,9 +8,7 @@ const LANGUAGE_STORAGE_KEY = 'lang'
 
 type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
 
-const normalizeLanguage = (
-  value: string | null | undefined,
-): SupportedLanguage => {
+const normalizeLanguage = (value: string | null | undefined): SupportedLanguage => {
   if (!value) {
     return 'en'
   }

@@ -11,9 +11,7 @@ type AppColorSchemeProviderProps = {
   children: ReactNode
 }
 
-export const AppColorSchemeProvider = ({
-  children,
-}: AppColorSchemeProviderProps) => {
+export const AppColorSchemeProvider = ({ children }: AppColorSchemeProviderProps) => {
   return (
     <MantineProvider
       theme={notionTheme}

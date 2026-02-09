@@ -39,7 +39,10 @@ export const WorkspaceShell = ({
   }
 
   return (
-    <Box style={{ minHeight: '100vh', background: 'var(--app-bg)' }} data-testid="workspace-shell-root">
+    <Box
+      style={{ minHeight: '100vh', background: 'var(--app-bg)' }}
+      data-testid="workspace-shell-root"
+    >
       {isDesktop ? (
         <Box
           data-testid="workspace-shell-sidebar"

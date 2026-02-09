@@ -2,7 +2,17 @@ import { useMemo } from 'react'
 import { useMantineColorScheme } from '@mantine/core'
 import { Spotlight } from '@mantine/spotlight'
 import { useNavigate } from '@tanstack/react-router'
-import { FolderKanban, Home, Inbox, Languages, ListTodo, MoonStar, Plus, Settings, Sun } from 'lucide-react'
+import {
+  FolderKanban,
+  Home,
+  Inbox,
+  Languages,
+  ListTodo,
+  MoonStar,
+  Plus,
+  Settings,
+  Sun,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export const TASK_FOCUS_EVENT = 'xstack:focus-new-task'

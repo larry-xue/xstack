@@ -15,7 +15,7 @@ const createCredentials = (): Credentials => {
 
 const signUp = async (page: Page, credentials: Credentials) => {
   await page.goto('/auth')
-  await page.getByRole('button', { name: 'Sign up' }).click()
+  await page.getByText('Sign up').click()
   await page.getByLabel('Email').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Create account' }).click()
@@ -92,7 +92,7 @@ test.describe('auth and tasks', () => {
     await expect(page).toHaveURL(/\/app\/settings$/)
 
     await page.getByRole('button', { name: 'Dark' }).click()
-    await page.getByRole('radio', { name: 'Chinese (Simplified)' }).click()
+    await page.getByText('Chinese (Simplified)').click()
     await page.reload()
 
     await expect(page.locator('html')).toHaveAttribute('data-mantine-color-scheme', 'dark')
@@ -110,7 +110,8 @@ test.describe('auth and tasks', () => {
     await signUp(page, credentials)
 
     await page.keyboard.press('Control+K')
-    await page.getByRole('option', { name: /Projects/ }).click()
+    await page.keyboard.type('Projects')
+    await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/app\/projects$/)
   })
 

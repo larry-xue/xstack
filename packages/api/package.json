@@ -17,6 +17,7 @@
     "dev": "tsx watch src/server.ts",
     "start": "pnpm run build && node dist/server.js",
     "test": "pnpm run build && node ../../node_modules/typescript/bin/tsc -p test/tsconfig.json --noEmit && vitest run --config vitest.config.ts",
+    "export:openapi": "tsx scripts/export-openapi.ts",
     "prisma": "prisma",
     "lint": "pnpm -w lint",
     "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"

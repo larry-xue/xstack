@@ -1,13 +1,6 @@
 import type { CSSProperties } from 'react'
 import { Avatar, Box, Group, Menu, Text, UnstyledButton } from '@mantine/core'
-import {
-  ChevronDown,
-  Languages,
-  LogOut,
-  MoonStar,
-  Sun,
-  type LucideIcon,
-} from 'lucide-react'
+import { ChevronDown, Languages, LogOut, MoonStar, Sun, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export type WorkspaceNavItem = {
@@ -81,7 +74,7 @@ export const WorkspaceSidebar = ({
       </Box>
 
       <Box p={8} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {navItems.map((item) => {
+        {navItems.map(item => {
           const Icon = item.icon
           const isActive = item.to
             ? currentPath === item.to || currentPath.startsWith(`${item.to}/`)
@@ -109,12 +102,12 @@ export const WorkspaceSidebar = ({
 
       <Box p={8} style={{ borderTop: '1px solid var(--app-border)' }}>
         <Menu shadow="sm" width={240} position="top-start">
-        <Menu.Target>
-          <UnstyledButton
-            data-testid="sidebar-account-trigger"
-            style={{
-              width: '100%',
-              height: 38,
+          <Menu.Target>
+            <UnstyledButton
+              data-testid="sidebar-account-trigger"
+              style={{
+                width: '100%',
+                height: 38,
                 borderRadius: 8,
                 padding: '0 8px',
                 display: 'flex',
@@ -145,12 +138,14 @@ export const WorkspaceSidebar = ({
               {isDarkMode ? t('common.themeLight') : t('common.themeDark')}
             </Menu.Item>
             <Menu.Item leftSection={<Languages size={14} />} onClick={onToggleLanguage}>
-              {currentLanguage === 'zh-CN'
-                ? t('common.languages.en')
-                : t('common.languages.zhCN')}
+              {currentLanguage === 'zh-CN' ? t('common.languages.en') : t('common.languages.zhCN')}
             </Menu.Item>
             <Menu.Divider />
-            <Menu.Item color="red" leftSection={<LogOut size={14} />} onClick={() => void onSignOut()}>
+            <Menu.Item
+              color="red"
+              leftSection={<LogOut size={14} />}
+              onClick={() => void onSignOut()}
+            >
               {t('shell.signOut')}
             </Menu.Item>
           </Menu.Dropdown>

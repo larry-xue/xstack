@@ -1,25 +1,52 @@
 import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
-import { disconnectPrisma } from './prisma'
-import { rootRoutes } from './routes/root'
-import { todoRoutes } from './modules/todos/routes'
-import { authGuard } from './plugins/auth'
-import { errorPlugin } from './plugins/error'
-import { requestContextPlugin } from './plugins/request-context'
+import { createAppContainer, type AppContainer } from './bootstrap/create-container'
+import { createAuthGuardPlugin } from './core/plugins/auth-guard'
+import { createErrorPlugin } from './core/plugins/error-handler'
+import { createRequestContextPlugin } from './core/plugins/request-context'
+import { createSystemRoutes } from './modules/system/presentation/http/routes'
+import { createTaskRoutes } from './modules/tasks/presentation/http/routes'
 
 type ElysiaOptions = NonNullable<ConstructorParameters<typeof Elysia>[0]>
 
-type CreateAppOptions = Pick<ElysiaOptions, 'adapter'>
+type CreateAppOptions = Pick<ElysiaOptions, 'adapter'> & {
+  container?: AppContainer
+}
 
-export const createApp = (options?: CreateAppOptions) =>
-  new Elysia(options)
-    .use(openapi())
-    .use(requestContextPlugin)
-    .use(errorPlugin)
+export const createApp = (options?: CreateAppOptions) => {
+  const container = options?.container ?? createAppContainer()
+
+  return new Elysia({
+    adapter: options?.adapter,
+  })
+    .use(
+      openapi({
+        path: '/openapi',
+        specPath: '/openapi/json',
+        documentation: {
+          info: {
+            title: 'XStack API',
+            version: '1.0.0',
+            description: 'Starter backend API for XStack.',
+          },
+          tags: [
+            { name: 'System', description: 'Service diagnostics and health' },
+            { name: 'Todos', description: 'Authenticated todo endpoints' },
+          ],
+        },
+      }),
+    )
+    .use(createRequestContextPlugin(container.logger))
+    .use(createErrorPlugin(container.logger))
     .onStop(async () => {
-      await disconnectPrisma()
+      await container.dispose()
     })
-    .use(rootRoutes)
-    .group('/api', (app) => app.use(authGuard).use(todoRoutes))
+    .use(createSystemRoutes())
+    .group('/api/v1', app =>
+      app
+        .use(createAuthGuardPlugin(container.authProvider))
+        .use(createTaskRoutes(container.taskUseCases)),
+    )
+}
 
 export type App = ReturnType<typeof createApp>

@@ -40,7 +40,7 @@ const TasksPage = () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       setNewTitle('')
     },
-    onError: (err) => {
+    onError: err => {
       setActionError(err instanceof Error ? err.message : t('tasks.errors.createFailed'))
     },
   })
@@ -53,7 +53,7 @@ const TasksPage = () => {
       setEditingId(null)
       setEditingTitle('')
     },
-    onError: (err) => {
+    onError: err => {
       setActionError(err instanceof Error ? err.message : t('tasks.errors.updateFailed'))
     },
   })
@@ -63,7 +63,7 @@ const TasksPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
-    onError: (err) => {
+    onError: err => {
       setActionError(err instanceof Error ? err.message : t('tasks.errors.deleteFailed'))
     },
   })
@@ -122,20 +122,6 @@ const TasksPage = () => {
 
   return (
     <Stack gap={16} data-testid="tasks-page">
-      <Group justify="space-between" align="end">
-        <Stack gap={2}>
-          <Text size="xl" fw={600} data-testid="tasks-title">
-            {t('tasks.title')}
-          </Text>
-          <Text size="sm" c="dimmed">
-            {t('tasks.subtitle')}
-          </Text>
-        </Stack>
-        <Text size="sm" c="dimmed">
-          {t('tasks.count', { count: tasks.length })}
-        </Text>
-      </Group>
-
       <Paper withBorder radius="sm" p={12} bg="var(--app-surface)">
         <form onSubmit={submitNewTask}>
           <Group align="end" wrap="nowrap">
@@ -144,12 +130,16 @@ const TasksPage = () => {
               label={t('tasks.form.label')}
               placeholder={t('tasks.form.placeholder')}
               value={newTitle}
-              onChange={(event) => setNewTitle(event.currentTarget.value)}
+              onChange={event => setNewTitle(event.currentTarget.value)}
               disabled={isWorking}
               required
               style={{ flex: 1 }}
             />
-            <Button type="submit" leftSection={<Plus size={14} />} loading={createMutation.isPending}>
+            <Button
+              type="submit"
+              leftSection={<Plus size={14} />}
+              loading={createMutation.isPending}
+            >
               {t('tasks.form.submit')}
             </Button>
           </Group>
@@ -202,7 +192,7 @@ const TasksPage = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {tasks.map((task) => {
+              {tasks.map(task => {
                 const isEditing = editingId === task.id
                 return (
                   <Table.Tr key={task.id}>
@@ -210,8 +200,8 @@ const TasksPage = () => {
                       {isEditing ? (
                         <TextInput
                           value={editingTitle}
-                          onChange={(event) => setEditingTitle(event.currentTarget.value)}
-                          onKeyDown={(event) => {
+                          onChange={event => setEditingTitle(event.currentTarget.value)}
+                          onKeyDown={event => {
                             if (event.key === 'Enter') {
                               submitEdit(task)
                             }
@@ -271,7 +261,11 @@ const TasksPage = () => {
                             <ActionIcon
                               variant="light"
                               color={task.isDone ? 'gray' : 'teal'}
-                              aria-label={task.isDone ? t('tasks.actions.markUndone') : t('tasks.actions.markDone')}
+                              aria-label={
+                                task.isDone
+                                  ? t('tasks.actions.markUndone')
+                                  : t('tasks.actions.markDone')
+                              }
                               onClick={() => toggleDone(task)}
                               disabled={isWorking}
                             >

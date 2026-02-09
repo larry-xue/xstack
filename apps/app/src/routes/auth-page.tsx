@@ -88,7 +88,7 @@ const AuthPage = () => {
 
           <SegmentedControl
             value={mode}
-            onChange={(value) => {
+            onChange={value => {
               if (value === 'login' || value === 'signup') {
                 setMode(value)
               }
@@ -107,7 +107,7 @@ const AuthPage = () => {
                 type="email"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.currentTarget.value)}
+                onChange={event => setEmail(event.currentTarget.value)}
                 required
                 disabled={isLoading}
               />
@@ -116,7 +116,7 @@ const AuthPage = () => {
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 minLength={6}
                 value={password}
-                onChange={(event) => setPassword(event.currentTarget.value)}
+                onChange={event => setPassword(event.currentTarget.value)}
                 required
                 disabled={isLoading}
               />

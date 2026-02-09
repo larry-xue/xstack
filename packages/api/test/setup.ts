@@ -1,6 +1,6 @@
-import { config as loadEnv } from 'dotenv'
+import { loadEnvFiles } from '../src/core/config/runtime-config'
 
-loadEnv({ path: '../.env.local', quiet: true })
+loadEnvFiles(process.cwd())
 
 if (process.env.DATABASE_URL_TEST) {
   process.env.DATABASE_URL = process.env.DATABASE_URL_TEST

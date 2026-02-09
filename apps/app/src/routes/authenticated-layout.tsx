@@ -12,7 +12,7 @@ const AuthenticatedLayout = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const pathname = useRouterState({
-    select: (state) => state.location.pathname,
+    select: state => state.location.pathname,
   })
   const { session, isLoading, signOut } = useAuth()
 
@@ -89,7 +89,7 @@ const AuthenticatedLayout = () => {
         title={pageTitleMap[pathname] ?? t('shell.workspaceLabel')}
         currentPath={pathname}
         navItems={navItems}
-        onNavigate={(to) => {
+        onNavigate={to => {
           void navigate({ to })
         }}
         onSignOut={async () => {

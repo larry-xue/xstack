@@ -1,4 +1,13 @@
-import { Button, Group, Paper, SegmentedControl, Stack, Text, Title, useMantineColorScheme } from '@mantine/core'
+import {
+  Button,
+  Group,
+  Paper,
+  SegmentedControl,
+  Stack,
+  Text,
+  Title,
+  useMantineColorScheme,
+} from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 
 const SettingsPage = () => {
@@ -38,7 +47,7 @@ const SettingsPage = () => {
           <Text fw={600}>{t('settings.language')}</Text>
           <SegmentedControl
             value={currentLanguage}
-            onChange={(value) => {
+            onChange={value => {
               if (value === 'en' || value === 'zh-CN') {
                 void i18n.changeLanguage(value)
               }

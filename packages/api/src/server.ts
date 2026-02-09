@@ -1,14 +1,17 @@
 import { node } from '@elysiajs/node'
-import { config as loadEnv } from 'dotenv'
+import { createAppContainer } from './bootstrap/create-container'
+import { loadRuntimeConfig } from './core/config/runtime-config'
+import { createApp } from './app'
 
-loadEnv({ path: '.env.local', quiet: true })
-
-const { createApp } = await import('./app')
-
-const port = Number(process.env.PORT ?? 54545)
+const runtimeConfig = loadRuntimeConfig()
+const container = createAppContainer({ runtimeConfig })
+const port = runtimeConfig.port
 const hostname = '0.0.0.0'
 
-const app = createApp({ adapter: node() })
+const app = createApp({
+  adapter: node(),
+  container,
+})
 app.listen({ port, hostname })
 
 console.log(`API listening on http://${hostname}:${port}`)

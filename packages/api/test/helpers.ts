@@ -1,5 +1,12 @@
 import { SignJWT } from 'jose'
-import { getPrisma } from '../src/prisma'
+import { loadRuntimeConfig } from '../src/core/config/runtime-config'
+import { getPrismaClient } from '../src/core/persistence/prisma-client'
+
+const runtimeConfig = loadRuntimeConfig()
+const prisma = getPrismaClient({
+  databaseUrl: runtimeConfig.databaseUrl,
+  nodeEnv: runtimeConfig.nodeEnv,
+})
 
 const getJwtSecret = () => {
   const secret = process.env.SUPABASE_JWT_SECRET
@@ -34,5 +41,5 @@ export const authHeader = (token: string) => ({
 })
 
 export const resetTodos = async (userId: string) => {
-  await getPrisma().todo.deleteMany({ where: { userId } })
+  await prisma.todo.deleteMany({ where: { userId } })
 }

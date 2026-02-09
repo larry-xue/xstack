@@ -1,0 +1,36 @@
+import { t } from 'elysia'
+import type { TSchema } from 'elysia'
+import { ErrorCodeEnum } from './errors'
+
+export type SuccessEnvelope<T> = {
+  data: T
+  meta: {
+    requestId: string
+  }
+}
+
+export const responseMetaSchema = t.Object({
+  requestId: t.String(),
+})
+
+export const makeSuccessEnvelopeSchema = (dataSchema: TSchema) =>
+  t.Object({
+    data: dataSchema,
+    meta: responseMetaSchema,
+  })
+
+export const errorEnvelopeSchema = t.Object({
+  error: t.Object({
+    code: t.Enum(ErrorCodeEnum),
+    message: t.String(),
+    requestId: t.String(),
+    details: t.Optional(t.Any()),
+  }),
+})
+
+export const toSuccessEnvelope = <T>(data: T, requestId: string): SuccessEnvelope<T> => ({
+  data,
+  meta: {
+    requestId,
+  },
+})
