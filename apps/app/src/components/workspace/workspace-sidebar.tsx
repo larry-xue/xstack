@@ -63,7 +63,6 @@ export const WorkspaceSidebar = ({
 }: WorkspaceSidebarProps) => {
   const { t } = useTranslation()
   const accountLabel = email ?? t('common.loading')
-  const workspaceLabel = t('shell.workspaceLabel')
 
   return (
     <Box
@@ -76,17 +75,8 @@ export const WorkspaceSidebar = ({
       }}
     >
       <Box px={12} py={12} style={{ borderBottom: '1px solid var(--app-border)' }}>
-        <Text
-          size="xs"
-          fw={700}
-          c="dimmed"
-          tt="uppercase"
-          style={{ letterSpacing: 0.5 }}
-        >
-          {t('common.productName')}
-        </Text>
         <Text size="lg" fw={600} mt={2}>
-          {workspaceLabel}
+          {t('common.productName')}
         </Text>
       </Box>
 

@@ -68,7 +68,7 @@ export const WorkspaceHeader = ({
         >
           <Group gap={6} wrap="nowrap">
             <Search size={14} />
-            <Text size="sm" c="dimmed">
+            <Text size="sm" c="dimmed" lineClamp={1}>
               {t('shell.searchPlaceholder')}
             </Text>
           </Group>
