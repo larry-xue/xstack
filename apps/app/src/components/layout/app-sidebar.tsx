@@ -20,12 +20,12 @@ type SidebarNavListProps = {
 
 export const SidebarNavList = ({ items, collapsed = false }: SidebarNavListProps) => {
   return (
-    <ul className="space-y-1.5">
+    <ul className="space-y-0" data-testid="sidebar-nav-list">
       {items.map((item) => {
         const Icon = item.icon
         const sharedClassName = cn(
-          'inline-flex w-full rounded-lg text-sm font-medium transition-colors',
-          collapsed ? 'justify-center px-2 py-2.5' : 'items-center gap-2.5 px-2.5 py-2',
+          'inline-flex h-8 w-full rounded-md text-[13px] leading-5 font-medium transition-colors',
+          collapsed ? 'justify-center px-0' : 'items-center gap-1.5 px-2',
         )
 
         if (!item.to) {
@@ -41,7 +41,7 @@ export const SidebarNavList = ({ items, collapsed = false }: SidebarNavListProps
                 <Icon className="size-4 shrink-0" />
                 <span className={cn(collapsed ? 'sr-only' : 'truncate')}>{item.label}</span>
                 {!collapsed && item.badge && (
-                  <Badge variant="secondary" className="ml-auto rounded-full text-[10px]">
+                  <Badge variant="secondary" className="ml-auto rounded-full px-1.5 text-[10px]">
                     {item.badge}
                   </Badge>
                 )}
@@ -73,7 +73,7 @@ export const SidebarNavList = ({ items, collapsed = false }: SidebarNavListProps
               {!collapsed && item.badge && (
                 <Badge
                   variant="secondary"
-                  className="ml-auto rounded-full border-none bg-background/80 text-[10px] text-foreground/90"
+                  className="ml-auto rounded-full border-none bg-background/90 px-1.5 text-[10px] text-foreground/90"
                 >
                   {item.badge}
                 </Badge>
@@ -88,8 +88,8 @@ export const SidebarNavList = ({ items, collapsed = false }: SidebarNavListProps
 
 export type AppSidebarProps = {
   title: string
-  subtitle: string
-  sectionLabel: string
+  subtitle?: string
+  sectionLabel?: string
   items: AppSidebarItem[]
   headerSlot?: ReactNode
   navSlot?: ReactNode
@@ -102,8 +102,6 @@ export type AppSidebarProps = {
 
 const AppSidebar = ({
   title,
-  subtitle,
-  sectionLabel,
   items,
   headerSlot,
   navSlot,
@@ -113,37 +111,42 @@ const AppSidebar = ({
   collapseLabel,
   className = '',
 }: AppSidebarProps) => {
+  const sidebarMonogram = title
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((token) => token[0]?.toUpperCase())
+    .join('')
+
   return (
     <aside
       className={cn(
-        'flex h-full w-full flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground',
+        'flex h-full w-full flex-col border-r border-sidebar-border/70 bg-sidebar text-sidebar-foreground',
         className,
       )}
     >
       {headerSlot ? (
-        <div className={cn('border-b border-sidebar-border', collapsed ? 'px-2 py-3' : 'px-4 py-4')}>
+        <div className={cn('h-14 border-b border-sidebar-border/70', collapsed ? 'px-1.5' : 'px-2')}>
           {headerSlot}
         </div>
       ) : (
-        <div className={cn('border-b border-sidebar-border', collapsed ? 'px-2 py-3' : 'px-4 py-4')}>
-          <div className={cn('flex items-center', collapsed ? 'justify-center' : 'justify-between gap-2')}>
-            {collapsed ? (
-              <span className="inline-flex size-8 items-center justify-center rounded-md bg-sidebar-accent text-xs font-semibold text-sidebar-foreground">
-                XS
+        <div className={cn('h-14 border-b border-sidebar-border/70 px-2')}>
+          <div className={cn('flex h-full items-center', collapsed ? 'justify-center' : 'justify-between gap-2')}>
+            <div className={cn('flex min-w-0 items-center', collapsed ? 'justify-center' : 'gap-1.5')}>
+              <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-sidebar-accent text-[11px] font-semibold text-sidebar-foreground">
+                {sidebarMonogram || 'XS'}
               </span>
-            ) : (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">
-                  {subtitle}
-                </p>
-                <h1 className="mt-1 font-display text-lg text-sidebar-foreground">{title}</h1>
-              </div>
-            )}
+              {!collapsed && (
+                <span className="truncate text-[12px] font-semibold tracking-[0.08em] text-sidebar-foreground/85 uppercase">
+                  {title}
+                </span>
+              )}
+            </div>
             {onToggleCollapsed && (
               <Button
                 type="button"
                 variant="ghost"
-                size="icon-sm"
+                size="icon-xs"
                 data-testid="sidebar-toggle"
                 aria-label={collapseLabel}
                 title={collapseLabel}
@@ -160,23 +163,16 @@ const AppSidebar = ({
         </div>
       )}
 
-      <div className={cn('flex-1', collapsed ? 'px-2 py-3' : 'px-3 py-4')}>
+      <div className={cn('flex-1', collapsed ? 'px-1.5 py-2' : 'px-2 py-2')}>
         {navSlot ? (
           navSlot
         ) : (
-          <>
-            {!collapsed && (
-              <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
-                {sectionLabel}
-              </p>
-            )}
-            <SidebarNavList items={items} collapsed={collapsed} />
-          </>
+          <SidebarNavList items={items} collapsed={collapsed} />
         )}
       </div>
 
       {footerSlot && (
-        <div className={cn('border-t border-sidebar-border', collapsed ? 'px-2 py-3' : 'px-3 py-4')}>
+        <div className={cn('border-t border-sidebar-border/70', collapsed ? 'px-1.5 py-2' : 'px-2 py-2')}>
           {footerSlot}
         </div>
       )}

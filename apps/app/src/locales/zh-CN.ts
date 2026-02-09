@@ -20,7 +20,7 @@ const zhCN = {
   authPage: {
     hero: {
       badge: '起步模板',
-      title: '快速构建，内置安全认证与受保护路由。',
+      title: '快速搭建，内置安全认证与受保护路由。',
       description:
         '这个模板包含 Supabase 认证、TanStack Router 路由守卫，以及已连接 API 的 Todo 全流程 CRUD 示例。',
       tags: {
@@ -47,9 +47,9 @@ const zhCN = {
     },
   },
   authenticatedLayout: {
-    brand: 'XStack 模板',
+    brand: 'XStack Starter',
     title: '项目工作区',
-    subtitle: 'SaaS 控制台',
+    subtitle: 'SaaS 面板',
     navigation: '导航',
     signedIn: '当前账号',
     signOut: '退出登录',
@@ -57,7 +57,7 @@ const zhCN = {
     searchPlaceholder: '搜索项目...',
     addNew: '新建...',
     openNavigation: '打开导航',
-    toggleSidebar: '收起或展开侧边栏',
+    toggleSidebar: '收起或展开侧栏',
     notifications: '通知',
     filter: '筛选',
     gridView: '网格视图',

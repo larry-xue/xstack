@@ -13,8 +13,8 @@ export type AppShellSlots = {
 export type AppShellProps = {
   sidebar: {
     title: string
-    subtitle: string
-    sectionLabel: string
+    subtitle?: string
+    sectionLabel?: string
     items: AppSidebarItem[]
   }
   header: Omit<AppHeaderProps, 'startSlot' | 'endSlot' | 'dataTestId'>
@@ -35,12 +35,15 @@ const AppShell = ({
   children,
 }: AppShellProps) => {
   return (
-    <div className="h-dvh w-screen overflow-hidden" data-testid="app-shell-root">
+    <div
+      className="h-dvh w-screen overflow-hidden bg-background text-foreground"
+      data-testid="app-shell-root"
+    >
       <div className="flex h-full w-full">
         <div
           className={cn(
             'hidden h-full shrink-0 lg:block',
-            sidebarCollapsed ? 'w-20' : 'w-72',
+            sidebarCollapsed ? 'w-16' : 'w-60',
           )}
           data-testid="app-shell-sidebar"
           data-collapsed={sidebarCollapsed ? 'true' : 'false'}
@@ -58,7 +61,7 @@ const AppShell = ({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="[--app-content-max:1120px] [--app-content-x:1.25rem] lg:[--app-content-x:1.5rem] flex min-w-0 flex-1 flex-col bg-background">
           <AppHeader
             {...header}
             startSlot={slots?.headerStart}
@@ -67,10 +70,12 @@ const AppShell = ({
           />
 
           <main
-            className="min-h-0 flex-1 overflow-y-auto"
+            className="min-h-0 flex-1 overflow-y-auto px-[var(--app-content-x)] py-5 lg:py-6"
             data-testid="app-shell-main"
           >
-            {children}
+            <div className="mx-auto w-full max-w-[var(--app-content-max)]">
+              {children}
+            </div>
           </main>
         </div>
       </div>

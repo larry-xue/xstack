@@ -1,9 +1,9 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { CheckCircle2, Circle, PencilLine, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { createTodo, deleteTodo, getTodos, updateTodo, type Todo } from '../lib/api'
@@ -105,15 +105,18 @@ const TodosPage = () => {
   }
 
   return (
-    <Card className="border-border/80 bg-card/90">
-      <CardHeader className="gap-4">
+    <section className="w-full space-y-5" data-testid="todos-page">
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <CardTitle className="font-display text-2xl">{t('todosPage.section.title')}</CardTitle>
+          <h1 className="font-display text-4xl leading-none tracking-tight" data-testid="todos-title">
+            {t('todosPage.section.title')}
+          </h1>
           <p className="text-xs text-muted-foreground">
             {t('todosPage.list.itemsCount', { count: todos.length })}
           </p>
         </div>
-        <form className="flex flex-col gap-3 sm:flex-row" onSubmit={submitNewTodo}>
+
+        <form className="flex flex-col gap-2 sm:flex-row" onSubmit={submitNewTodo}>
           <Input
             className="sm:flex-1"
             placeholder={t('todosPage.form.placeholder')}
@@ -128,9 +131,9 @@ const TodosPage = () => {
             {t('todosPage.form.submit')}
           </Button>
         </form>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4">
+      <div className="space-y-4">
         {actionError && (
           <Alert variant="destructive">
             <AlertTitle>{t('todosPage.errors.actionFailed')}</AlertTitle>
@@ -159,20 +162,17 @@ const TodosPage = () => {
           <p className="text-sm text-muted-foreground">{t('todosPage.list.empty')}</p>
         )}
 
-        <ul>
+        <ul className="divide-y divide-border/60">
           {todos.map((todo) => {
             const isEditing = editingId === todo.id
             return (
-              <li key={todo.id} className="border-b border-border/60 py-3 last:border-b-0">
+              <li key={todo.id} className="py-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Button
-                      variant={todo.isDone ? 'secondary' : 'outline'}
-                      className={`h-10 min-w-10 text-xs font-semibold ${
-                        todo.isDone
-                          ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                          : ''
-                      }`}
+                      variant={todo.isDone ? 'secondary' : 'ghost'}
+                      size="icon-sm"
+                      className={todo.isDone ? 'text-emerald-600 dark:text-emerald-300' : 'text-muted-foreground'}
                       type="button"
                       onClick={() => toggleDone(todo)}
                       aria-label={
@@ -182,11 +182,11 @@ const TodosPage = () => {
                       }
                       disabled={isWorking}
                     >
-                      {todo.isDone ? t('todosPage.list.done') : t('todosPage.list.todo')}
+                      {todo.isDone ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
                     </Button>
-                    <div>
+                    <div className="min-w-0">
                       <p
-                        className={`text-sm font-semibold ${
+                        className={`truncate text-[15px] font-medium ${
                           todo.isDone ? 'text-muted-foreground line-through' : 'text-foreground'
                         }`}
                       >
@@ -199,22 +199,26 @@ const TodosPage = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
                     <Button
                       variant="ghost"
+                      size="icon-sm"
                       type="button"
+                      aria-label={t('todosPage.list.edit')}
                       onClick={() => startEditing(todo)}
                       disabled={isWorking}
                     >
-                      {t('todosPage.list.edit')}
+                      <PencilLine className="size-4" />
                     </Button>
                     <Button
                       variant="ghost"
+                      size="icon-sm"
                       type="button"
+                      aria-label={t('todosPage.list.delete')}
                       onClick={() => deleteMutation.mutate(todo.id)}
                       disabled={isWorking}
                     >
-                      {t('todosPage.list.delete')}
+                      <Trash2 className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -251,8 +255,8 @@ const TodosPage = () => {
             )
           })}
         </ul>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 

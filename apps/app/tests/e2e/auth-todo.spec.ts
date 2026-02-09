@@ -115,10 +115,28 @@ test.describe('auth and todos', () => {
 
     const shell = page.getByTestId('app-shell-root')
     await expect(shell).toBeVisible()
+    await expect(page.getByTestId('sidebar-nav-list').first()).toHaveClass(/space-y-0/)
     await openAccountMenu(page)
     await expect(page.getByRole('menuitem', { name: 'Theme' })).toBeVisible()
     await expect(page.getByRole('menuitem', { name: 'Language' })).toBeVisible()
     await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('sidebar-account-menu')).toBeHidden()
+
+    const titleAlignment = await page.evaluate(() => {
+      const headerTitle = document.querySelector('[data-testid="app-shell-header"] h2')
+      const contentTitle = document.querySelector('[data-testid="todos-title"]')
+      if (!headerTitle || !contentTitle) {
+        return null
+      }
+      const headerRect = headerTitle.getBoundingClientRect()
+      const contentRect = contentTitle.getBoundingClientRect()
+      return Math.abs(contentRect.x - headerRect.x)
+    })
+
+    expect(titleAlignment).not.toBeNull()
+    expect(titleAlignment ?? 99).toBeLessThanOrEqual(1)
+    await expect(page.locator('[data-testid="todos-page"] [data-slot="card"]')).toHaveCount(0)
 
     const viewport = page.viewportSize()
     if (!viewport) {

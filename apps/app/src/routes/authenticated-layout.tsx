@@ -18,7 +18,6 @@ import SidebarAccountMenu from '@/components/layout/sidebar-account-menu'
 import AppShell, { type AppShellSlots } from '@/components/layout/app-shell'
 import AppSidebar, { SidebarNavList, type AppSidebarItem } from '@/components/layout/app-sidebar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useAuth } from '../providers/auth'
 
@@ -93,9 +92,7 @@ const AuthenticatedLayout = () => {
     await navigate({ to: '/auth' })
   }
 
-  const sidebarTitle = t('authenticatedLayout.title')
-  const sidebarSubtitle = t('authenticatedLayout.brand')
-  const sidebarSection = t('authenticatedLayout.navigation')
+  const sidebarTitle = t('authenticatedLayout.brand')
 
   const renderSidebarFooter = () => (
     <SidebarAccountMenu
@@ -111,23 +108,21 @@ const AuthenticatedLayout = () => {
       <Sheet>
         <SheetTrigger asChild>
           <Button
-            variant="outline"
-            size="icon-sm"
+            variant="ghost"
+            size="icon-xs"
             className="lg:hidden"
             aria-label={t('authenticatedLayout.openNavigation')}
           >
             <Menu className="size-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0">
+        <SheetContent side="left" className="w-60 p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>{sidebarTitle}</SheetTitle>
             <SheetDescription>{t('authenticatedLayout.openNavigation')}</SheetDescription>
           </SheetHeader>
           <AppSidebar
             title={sidebarTitle}
-            subtitle={sidebarSubtitle}
-            sectionLabel={sidebarSection}
             items={navItems}
             navSlot={<SidebarNavList items={navItems} />}
             footerSlot={
@@ -144,8 +139,6 @@ const AuthenticatedLayout = () => {
     <AppShell
       sidebar={{
         title: sidebarTitle,
-        subtitle: sidebarSubtitle,
-        sectionLabel: sidebarSection,
         items: navItems,
       }}
       header={{
@@ -157,11 +150,7 @@ const AuthenticatedLayout = () => {
       slots={appShellSlots}
     >
       {isLoading ? (
-        <Card>
-          <CardContent className="py-6 text-sm text-muted-foreground">
-            {t('authenticatedLayout.loadingSession')}
-          </CardContent>
-        </Card>
+        <div className="py-6 text-sm text-muted-foreground">{t('authenticatedLayout.loadingSession')}</div>
       ) : (
         <Outlet />
       )}
