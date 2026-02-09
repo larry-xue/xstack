@@ -3,7 +3,7 @@ import { Elysia } from 'elysia'
 import { disconnectPrisma } from './prisma'
 import { rootRoutes } from './routes/root'
 import { todoRoutes } from './modules/todos/routes'
-import { authGuard, authPlugin } from './plugins/auth'
+import { authGuard } from './plugins/auth'
 import { errorPlugin } from './plugins/error'
 import { requestContextPlugin } from './plugins/request-context'
 
@@ -20,6 +20,6 @@ export const createApp = (options?: CreateAppOptions) =>
       await disconnectPrisma()
     })
     .use(rootRoutes)
-    .group('/api', (app) => app.use(authPlugin).use(authGuard).use(todoRoutes))
+    .group('/api', (app) => app.use(authGuard).use(todoRoutes))
 
 export type App = ReturnType<typeof createApp>

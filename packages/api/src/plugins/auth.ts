@@ -8,7 +8,7 @@ import {
 
 export type AuthContext = SupabaseAuthContext
 
-export const authPlugin = new Elysia()
+const authPlugin = new Elysia()
   .derive(
     { as: 'scoped' },
     async ({ request }): Promise<{ auth: AuthContext | null }> => {
