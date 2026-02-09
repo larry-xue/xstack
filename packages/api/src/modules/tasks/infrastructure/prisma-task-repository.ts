@@ -1,6 +1,11 @@
-import type { PrismaClient } from '@prisma/client'
+import type { Prisma, PrismaClient } from '@prisma/client'
 import type { TaskRepository } from '../application/ports/task-repository'
-import type { TaskEntity } from '../domain/task'
+import {
+  TaskSortByEnum,
+  TaskStatusFilterEnum,
+  type TaskEntity,
+  type TaskListPage,
+} from '../domain/task'
 
 const toTaskEntity = (task: {
   id: string
@@ -19,13 +24,57 @@ const toTaskEntity = (task: {
 export class PrismaTaskRepository implements TaskRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async listByUser(userId: string): Promise<TaskEntity[]> {
-    const tasks = await this.prisma.todo.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    })
+  async listByUser(input: {
+    userId: string
+    query: {
+      page: number
+      pageSize: number
+      sortBy: 'createdAt' | 'updatedAt' | 'title'
+      sortOrder: 'asc' | 'desc'
+      status: 'all' | 'todo' | 'done'
+    }
+  }): Promise<TaskListPage> {
+    const where: Prisma.TodoWhereInput = {
+      userId: input.userId,
+    }
 
-    return tasks.map(toTaskEntity)
+    if (input.query.status === TaskStatusFilterEnum.DONE) {
+      where.isDone = true
+    } else if (input.query.status === TaskStatusFilterEnum.TODO) {
+      where.isDone = false
+    }
+
+    const orderBy: Prisma.TodoOrderByWithRelationInput =
+      input.query.sortBy === TaskSortByEnum.TITLE
+        ? { title: input.query.sortOrder }
+        : input.query.sortBy === TaskSortByEnum.UPDATED_AT
+          ? { updatedAt: input.query.sortOrder }
+          : { createdAt: input.query.sortOrder }
+
+    const skip = (input.query.page - 1) * input.query.pageSize
+
+    const [total, tasks] = await this.prisma.$transaction([
+      this.prisma.todo.count({ where }),
+      this.prisma.todo.findMany({
+        where,
+        orderBy,
+        skip,
+        take: input.query.pageSize,
+      }),
+    ])
+
+    const totalPages = Math.max(1, Math.ceil(total / input.query.pageSize))
+
+    return {
+      items: tasks.map(toTaskEntity),
+      total,
+      page: input.query.page,
+      pageSize: input.query.pageSize,
+      totalPages,
+      sortBy: input.query.sortBy,
+      sortOrder: input.query.sortOrder,
+      status: input.query.status,
+    }
   }
 
   async create(input: { userId: string; title: string }): Promise<TaskEntity> {
@@ -43,38 +92,21 @@ export class PrismaTaskRepository implements TaskRepository {
     userId: string
     taskId: string
     patch: { title?: string; isDone?: boolean }
-  }): Promise<TaskEntity | null> {
+  }): Promise<boolean> {
     const now = new Date()
 
-    const task = await this.prisma.$transaction(async tx => {
-      const updated = await tx.todo.updateMany({
-        where: {
-          id: input.taskId,
-          userId: input.userId,
-        },
-        data: {
-          ...input.patch,
-          updatedAt: now,
-        },
-      })
-
-      if (updated.count === 0) {
-        return null
-      }
-
-      return tx.todo.findFirst({
-        where: {
-          id: input.taskId,
-          userId: input.userId,
-        },
-      })
+    const updated = await this.prisma.todo.updateMany({
+      where: {
+        id: input.taskId,
+        userId: input.userId,
+      },
+      data: {
+        ...input.patch,
+        updatedAt: now,
+      },
     })
 
-    if (!task) {
-      return null
-    }
-
-    return toTaskEntity(task)
+    return updated.count > 0
   }
 
   async deleteForUser(input: { userId: string; taskId: string }): Promise<boolean> {

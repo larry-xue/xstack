@@ -1,68 +1,148 @@
 import { describe, expect, test } from 'vitest'
 import { AppError, ErrorCodeEnum } from '../src/core/http/errors'
-import { createTaskUseCases } from '../src/modules/tasks/application/use-cases'
 import type { TaskRepository } from '../src/modules/tasks/application/ports/task-repository'
-import type { TaskEntity } from '../src/modules/tasks/domain/task'
+import { createTaskUseCases } from '../src/modules/tasks/application/use-cases'
+import {
+  TaskSortByEnum,
+  TaskSortOrderEnum,
+  TaskStatusFilterEnum,
+  type TaskEntity,
+  type TaskListQuery,
+} from '../src/modules/tasks/domain/task'
 
-const now = new Date('2026-02-09T00:00:00.000Z')
+const baseTime = new Date('2026-02-09T00:00:00.000Z')
 
-const makeTask = (id: string, title: string, isDone = false): TaskEntity => ({
-  id,
-  title,
-  isDone,
-  createdAt: now,
-  updatedAt: now,
+type TaskRecord = TaskEntity & { userId: string }
+
+const asListQuery = (query: Partial<TaskListQuery> = {}): TaskListQuery => ({
+  page: query.page ?? 1,
+  pageSize: query.pageSize ?? 10,
+  sortBy: query.sortBy ?? TaskSortByEnum.CREATED_AT,
+  sortOrder: query.sortOrder ?? TaskSortOrderEnum.DESC,
+  status: query.status ?? TaskStatusFilterEnum.ALL,
 })
 
 const createRepositoryStub = (): TaskRepository => {
-  const tasksById = new Map<string, TaskEntity>()
+  const tasksById = new Map<string, TaskRecord>()
+  let counter = 1
 
   return {
-    listByUser: async () => Array.from(tasksById.values()),
-    create: async ({ userId, title }) => {
-      const task = makeTask(`${userId}-${tasksById.size + 1}`, title)
-      tasksById.set(task.id, task)
-      return task
-    },
-    updateForUser: async ({ taskId, patch }) => {
-      const task = tasksById.get(taskId)
-      if (!task) {
-        return null
+    listByUser: async ({ userId, query }) => {
+      let items = Array.from(tasksById.values()).filter(task => task.userId === userId)
+
+      if (query.status === TaskStatusFilterEnum.TODO) {
+        items = items.filter(task => !task.isDone)
+      } else if (query.status === TaskStatusFilterEnum.DONE) {
+        items = items.filter(task => task.isDone)
       }
 
-      const updated: TaskEntity = {
+      const direction = query.sortOrder === TaskSortOrderEnum.ASC ? 1 : -1
+      items.sort((a, b) => {
+        if (query.sortBy === TaskSortByEnum.TITLE) {
+          return direction * a.title.localeCompare(b.title)
+        }
+
+        const aTime =
+          query.sortBy === TaskSortByEnum.UPDATED_AT ? a.updatedAt.getTime() : a.createdAt.getTime()
+        const bTime =
+          query.sortBy === TaskSortByEnum.UPDATED_AT ? b.updatedAt.getTime() : b.createdAt.getTime()
+
+        return direction * (aTime - bTime)
+      })
+
+      const total = items.length
+      const skip = (query.page - 1) * query.pageSize
+      const pageItems = items.slice(skip, skip + query.pageSize)
+
+      return {
+        items: pageItems.map(({ userId: _userId, ...task }) => task),
+        total,
+        page: query.page,
+        pageSize: query.pageSize,
+        totalPages: Math.max(1, Math.ceil(total / query.pageSize)),
+        sortBy: query.sortBy,
+        sortOrder: query.sortOrder,
+        status: query.status,
+      }
+    },
+    create: async ({ userId, title }) => {
+      const id = `${userId}-${counter}`
+      counter += 1
+      const createdAt = new Date(baseTime.getTime() + counter * 1000)
+      const task: TaskRecord = {
+        id,
+        userId,
+        title,
+        isDone: false,
+        createdAt,
+        updatedAt: createdAt,
+      }
+      tasksById.set(id, task)
+      const { userId: _userId, ...entity } = task
+      return entity
+    },
+    updateForUser: async ({ userId, taskId, patch }) => {
+      const task = tasksById.get(taskId)
+      if (!task || task.userId !== userId) {
+        return false
+      }
+
+      tasksById.set(taskId, {
         ...task,
         title: patch.title ?? task.title,
         isDone: patch.isDone ?? task.isDone,
-        updatedAt: now,
-      }
-      tasksById.set(taskId, updated)
-      return updated
+        updatedAt: new Date(task.updatedAt.getTime() + 1000),
+      })
+      return true
     },
-    deleteForUser: async ({ taskId }) => tasksById.delete(taskId),
+    deleteForUser: async ({ userId, taskId }) => {
+      const task = tasksById.get(taskId)
+      if (!task || task.userId !== userId) {
+        return false
+      }
+
+      tasksById.delete(taskId)
+      return true
+    },
   }
 }
 
 describe('Task use cases', () => {
-  test('create/list returns task DTOs', async () => {
+  test('create/list returns paged task DTOs', async () => {
     const useCases = createTaskUseCases(createRepositoryStub())
 
     const created = await useCases.create('user-1', 'Ship plan')
     expect(created.title).toBe('Ship plan')
-    expect(created.createdAt).toBe(now.toISOString())
 
-    const list = await useCases.list('user-1')
-    expect(list).toHaveLength(1)
-    expect(list[0].id).toBe(created.id)
+    await useCases.create('user-1', 'Write docs')
+    await useCases.create('user-2', 'Other tenant')
+
+    const list = await useCases.list(
+      'user-1',
+      asListQuery({
+        page: 1,
+        pageSize: 1,
+        sortBy: TaskSortByEnum.TITLE,
+        sortOrder: TaskSortOrderEnum.ASC,
+      }),
+    )
+
+    expect(list.total).toBe(2)
+    expect(list.items).toHaveLength(1)
+    expect(list.totalPages).toBe(2)
+    expect(list.items[0]?.id).toBe(created.id)
   })
 
-  test('update throws TASK_NO_UPDATES on empty patch', async () => {
+  test('update returns action success envelope payload shape', async () => {
     const useCases = createTaskUseCases(createRepositoryStub())
-    await useCases.create('user-1', 'One task')
+    const created = await useCases.create('user-1', 'One task')
 
-    await expect(useCases.update('user-1', 'user-1-1', {})).rejects.toMatchObject({
-      code: ErrorCodeEnum.TASK_NO_UPDATES,
-    } satisfies Partial<AppError>)
+    const result = await useCases.update('user-1', created.id, {
+      title: 'One task updated',
+      isDone: true,
+    })
+
+    expect(result).toEqual({ ok: true })
   })
 
   test('update/delete throws TASK_NOT_FOUND for missing task', async () => {

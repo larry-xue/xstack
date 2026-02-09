@@ -14,9 +14,11 @@ type DeleteTodoResponse =
 type CreateTodoBody = operations['postApiV1Todos']['requestBody']['content']['application/json']
 export type UpdateTodoPatch =
   operations['patchApiV1TodosById']['requestBody']['content']['application/json']
+export type ListTodosQuery = NonNullable<operations['getApiV1Todos']['parameters']['query']>
 type ErrorEnvelope = operations['getApiV1Todos']['responses'][401]['content']['application/json']
 
-export type Task = ListTodosResponse['data'][number]
+export type TaskList = ListTodosResponse['data']
+export type Task = TaskList['items'][number]
 
 type RequestOptions = {
   baseUrl?: string
@@ -75,12 +77,33 @@ const createRequest = (options: RequestOptions) => {
   }
 }
 
+const isQueryPrimitive = (value: unknown): value is string | number | boolean =>
+  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+
+const withQuery = (path: string, query?: Record<string, unknown>) => {
+  if (!query) {
+    return path
+  }
+
+  const params = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(query)) {
+    if (isQueryPrimitive(value)) {
+      params.set(key, String(value))
+    }
+  }
+
+  const qs = params.toString()
+  return qs.length > 0 ? `${path}?${qs}` : path
+}
+
 export const createApiClient = (options: RequestOptions = {}) => {
   const request = createRequest(options)
 
   return {
-    getTodos: async () => {
-      const response = await request<ListTodosResponse>('/api/v1/todos')
+    getTodos: async (query?: ListTodosQuery) => {
+      const path = withQuery('/api/v1/todos', query as Record<string, unknown> | undefined)
+      const response = await request<ListTodosResponse>(path)
       return response.data
     },
     createTodo: async (title: string) => {

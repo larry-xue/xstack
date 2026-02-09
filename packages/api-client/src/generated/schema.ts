@@ -140,7 +140,13 @@ export interface operations {
   }
   getApiV1Todos: {
     parameters: {
-      query?: never
+      query?: {
+        page?: string | number
+        pageSize?: string | number
+        sortBy?: 'createdAt' | 'updatedAt' | 'title'
+        sortOrder?: 'asc' | 'desc'
+        status?: 'all' | 'todo' | 'done'
+      }
       header?: never
       path?: never
       cookie?: never
@@ -155,12 +161,24 @@ export interface operations {
         content: {
           'application/json': {
             data: {
-              id: string
-              title: string
-              isDone: boolean
-              createdAt: string
-              updatedAt: string
-            }[]
+              items: {
+                id: string
+                title: string
+                isDone: boolean
+                createdAt: string
+                updatedAt: string
+              }[]
+              total: number
+              page: number
+              pageSize: number
+              totalPages: number
+              /** @enum {string} */
+              sortBy: 'createdAt' | 'updatedAt' | 'title'
+              /** @enum {string} */
+              sortOrder: 'asc' | 'desc'
+              /** @enum {string} */
+              status: 'all' | 'todo' | 'done'
+            }
             meta: {
               requestId: string
             }
@@ -180,7 +198,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -207,7 +224,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -234,7 +250,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -304,7 +319,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -331,7 +345,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -358,7 +371,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -385,7 +397,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -442,7 +453,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -469,7 +479,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -496,7 +505,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -523,7 +531,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -573,11 +580,8 @@ export interface operations {
         content: {
           'application/json': {
             data: {
-              id: string
-              title: string
-              isDone: boolean
-              createdAt: string
-              updatedAt: string
+              /** @constant */
+              ok: true
             }
             meta: {
               requestId: string
@@ -598,7 +602,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -625,7 +628,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -652,7 +654,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -679,7 +680,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'
@@ -706,7 +706,6 @@ export interface operations {
                 | 'AUTH_MISSING_TOKEN'
                 | 'AUTH_INVALID_TOKEN'
                 | 'TASK_NOT_FOUND'
-                | 'TASK_NO_UPDATES'
                 | 'VALIDATION_ERROR'
                 | 'PARSE_ERROR'
                 | 'ROUTE_NOT_FOUND'

@@ -1,33 +1,22 @@
 import { AppError, ErrorCodeEnum } from '../../../../core/http/errors'
-import type { TaskDto, TaskPatch } from '../../domain/task'
-import { toTaskDto } from '../../domain/task'
+import type { TaskDto, TaskListPageDto, TaskListQuery, TaskPatch } from '../../domain/task'
+import { toTaskDto, toTaskListPageDto } from '../../domain/task'
 import type { TaskRepository } from '../ports/task-repository'
 
 export type TaskUseCases = {
-  list: (userId: string) => Promise<TaskDto[]>
+  list: (userId: string, query: TaskListQuery) => Promise<TaskListPageDto>
   create: (userId: string, title: string) => Promise<TaskDto>
-  update: (userId: string, taskId: string, patch: TaskPatch) => Promise<TaskDto>
+  update: (userId: string, taskId: string, patch: TaskPatch) => Promise<{ ok: true }>
   delete: (userId: string, taskId: string) => Promise<{ ok: true }>
 }
 
-const toValidatedPatch = (patch: TaskPatch): TaskPatch => {
-  const validatedPatch: TaskPatch = {}
-
-  if (typeof patch.title === 'string') {
-    validatedPatch.title = patch.title
-  }
-
-  if (typeof patch.isDone === 'boolean') {
-    validatedPatch.isDone = patch.isDone
-  }
-
-  return validatedPatch
-}
-
 export const createTaskUseCases = (taskRepository: TaskRepository): TaskUseCases => ({
-  list: async (userId: string) => {
-    const tasks = await taskRepository.listByUser(userId)
-    return tasks.map(toTaskDto)
+  list: async (userId: string, query: TaskListQuery) => {
+    const page = await taskRepository.listByUser({
+      userId,
+      query,
+    })
+    return toTaskListPageDto(page)
   },
 
   create: async (userId: string, title: string) => {
@@ -36,22 +25,13 @@ export const createTaskUseCases = (taskRepository: TaskRepository): TaskUseCases
   },
 
   update: async (userId: string, taskId: string, patch: TaskPatch) => {
-    const validatedPatch = toValidatedPatch(patch)
-    if (Object.keys(validatedPatch).length === 0) {
-      throw new AppError({
-        code: ErrorCodeEnum.TASK_NO_UPDATES,
-        status: 400,
-        message: 'No updates provided',
-      })
-    }
-
-    const task = await taskRepository.updateForUser({
+    const updated = await taskRepository.updateForUser({
       userId,
       taskId,
-      patch: validatedPatch,
+      patch,
     })
 
-    if (!task) {
+    if (!updated) {
       throw new AppError({
         code: ErrorCodeEnum.TASK_NOT_FOUND,
         status: 404,
@@ -59,7 +39,7 @@ export const createTaskUseCases = (taskRepository: TaskRepository): TaskUseCases
       })
     }
 
-    return toTaskDto(task)
+    return { ok: true as const }
   },
 
   delete: async (userId: string, taskId: string) => {

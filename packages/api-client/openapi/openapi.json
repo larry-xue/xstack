@@ -103,6 +103,75 @@
     "/api/v1/todos": {
       "get": {
         "tags": ["Todos"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "anyOf": [
+                {
+                  "format": "numeric",
+                  "default": 0,
+                  "type": "string"
+                },
+                {
+                  "minimum": 1,
+                  "maximum": 100,
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["createdAt", "updatedAt", "title"]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["all", "todo", "done"]
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Response for status 200",
@@ -113,26 +182,69 @@
                   "required": ["data", "meta"],
                   "properties": {
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": ["id", "title", "isDone", "createdAt", "updatedAt"],
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "isDone": {
-                            "type": "boolean"
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
-                            "type": "string"
+                      "type": "object",
+                      "required": [
+                        "items",
+                        "total",
+                        "page",
+                        "pageSize",
+                        "totalPages",
+                        "sortBy",
+                        "sortOrder",
+                        "status"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["id", "title", "isDone", "createdAt", "updatedAt"],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "isDone": {
+                                "type": "boolean"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              },
+                              "updatedAt": {
+                                "type": "string"
+                              }
+                            }
                           }
+                        },
+                        "total": {
+                          "minimum": 0,
+                          "type": "number"
+                        },
+                        "page": {
+                          "minimum": 1,
+                          "type": "number"
+                        },
+                        "pageSize": {
+                          "minimum": 1,
+                          "type": "number"
+                        },
+                        "totalPages": {
+                          "minimum": 1,
+                          "type": "number"
+                        },
+                        "sortBy": {
+                          "type": "string",
+                          "enum": ["createdAt", "updatedAt", "title"]
+                        },
+                        "sortOrder": {
+                          "type": "string",
+                          "enum": ["asc", "desc"]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["all", "todo", "done"]
                         }
                       }
                     },
@@ -168,7 +280,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -209,7 +320,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -250,7 +360,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -384,7 +493,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -425,7 +533,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -466,7 +573,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -507,7 +613,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -552,6 +657,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "minProperties": 1,
                 "type": "object",
                 "properties": {
                   "title": {
@@ -567,6 +673,7 @@
             },
             "application/x-www-form-urlencoded": {
               "schema": {
+                "minProperties": 1,
                 "type": "object",
                 "properties": {
                   "title": {
@@ -582,6 +689,7 @@
             },
             "multipart/form-data": {
               "schema": {
+                "minProperties": 1,
                 "type": "object",
                 "properties": {
                   "title": {
@@ -608,22 +716,11 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": ["id", "title", "isDone", "createdAt", "updatedAt"],
+                      "required": ["ok"],
                       "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "isDone": {
+                        "ok": {
+                          "const": true,
                           "type": "boolean"
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string"
                         }
                       }
                     },
@@ -659,7 +756,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -700,7 +796,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -741,7 +836,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -782,7 +876,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -823,7 +916,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -912,7 +1004,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -953,7 +1044,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -994,7 +1084,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",
@@ -1035,7 +1124,6 @@
                             "AUTH_MISSING_TOKEN",
                             "AUTH_INVALID_TOKEN",
                             "TASK_NOT_FOUND",
-                            "TASK_NO_UPDATES",
                             "VALIDATION_ERROR",
                             "PARSE_ERROR",
                             "ROUTE_NOT_FOUND",

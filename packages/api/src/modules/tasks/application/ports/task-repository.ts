@@ -1,12 +1,8 @@
-import type { TaskEntity, TaskPatch } from '../../domain/task'
+import type { TaskEntity, TaskListPage, TaskListQuery, TaskPatch } from '../../domain/task'
 
 export interface TaskRepository {
-  listByUser(userId: string): Promise<TaskEntity[]>
+  listByUser(input: { userId: string; query: TaskListQuery }): Promise<TaskListPage>
   create(input: { userId: string; title: string }): Promise<TaskEntity>
-  updateForUser(input: {
-    userId: string
-    taskId: string
-    patch: TaskPatch
-  }): Promise<TaskEntity | null>
+  updateForUser(input: { userId: string; taskId: string; patch: TaskPatch }): Promise<boolean>
   deleteForUser(input: { userId: string; taskId: string }): Promise<boolean>
 }

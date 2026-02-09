@@ -2,11 +2,13 @@ import { Elysia } from 'elysia'
 import type { AuthPrincipal } from '../../../auth/application/ports/auth-provider'
 import { toSuccessEnvelope } from '../../../../core/http/envelope'
 import type { TaskUseCases } from '../../application/use-cases'
+import { withTaskListDefaults } from '../../domain/task'
 import {
+  actionSuccessSchema,
   commonErrorSchema,
   createTaskBodySchema,
-  deleteTaskSuccessSchema,
   listTasksSuccessSchema,
+  taskListQuerySchema,
   taskParamsSchema,
   taskSuccessSchema,
   updateTaskBodySchema,
@@ -23,10 +25,14 @@ export const createTaskRoutes = (taskUseCases: TaskUseCases) =>
   new Elysia<'', AuthenticatedRequestSingleton>()
     .get(
       '/todos',
-      async ({ auth, requestId }) =>
-        toSuccessEnvelope(await taskUseCases.list(auth.userId), requestId),
+      async ({ auth, query, requestId }) =>
+        toSuccessEnvelope(
+          await taskUseCases.list(auth.userId, withTaskListDefaults(query)),
+          requestId,
+        ),
       {
         detail: { tags: ['Todos'] },
+        query: taskListQuerySchema,
         response: {
           200: listTasksSuccessSchema,
           401: commonErrorSchema,
@@ -60,7 +66,7 @@ export const createTaskRoutes = (taskUseCases: TaskUseCases) =>
         params: taskParamsSchema,
         body: updateTaskBodySchema,
         response: {
-          200: taskSuccessSchema,
+          200: actionSuccessSchema,
           400: commonErrorSchema,
           401: commonErrorSchema,
           404: commonErrorSchema,
@@ -77,7 +83,7 @@ export const createTaskRoutes = (taskUseCases: TaskUseCases) =>
         detail: { tags: ['Todos'] },
         params: taskParamsSchema,
         response: {
-          200: deleteTaskSuccessSchema,
+          200: actionSuccessSchema,
           401: commonErrorSchema,
           404: commonErrorSchema,
           500: commonErrorSchema,

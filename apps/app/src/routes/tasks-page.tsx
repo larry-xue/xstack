@@ -7,16 +7,21 @@ import {
   Group,
   Loader,
   Paper,
+  Select,
   Stack,
   Table,
   Text,
   TextInput,
 } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, PencilLine, Plus, Trash2, X } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, PencilLine, Plus, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { TASK_FOCUS_EVENT } from '@/components/workspace/command-palette'
 import { createTask, deleteTask, getTasks, updateTask, type Task } from '@/lib/api'
+
+type TaskSortBy = 'createdAt' | 'updatedAt' | 'title'
+type TaskSortOrder = 'asc' | 'desc'
+type TaskStatus = 'all' | 'todo' | 'done'
 
 const statusBadgeColor = (done: boolean) => (done ? 'teal' : 'gray')
 
@@ -28,10 +33,26 @@ const TasksPage = () => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
   const [actionError, setActionError] = useState<string | null>(null)
+  const [status, setStatus] = useState<TaskStatus>('all')
+  const [sortBy, setSortBy] = useState<TaskSortBy>('createdAt')
+  const [sortOrder, setSortOrder] = useState<TaskSortOrder>('desc')
+  const [pageSize, setPageSize] = useState(10)
+  const [page, setPage] = useState(1)
+
+  const query = useMemo(
+    () => ({
+      page,
+      pageSize,
+      sortBy,
+      sortOrder,
+      status,
+    }),
+    [page, pageSize, sortBy, sortOrder, status],
+  )
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: getTasks,
+    queryKey: ['tasks', query],
+    queryFn: () => getTasks(query),
   })
 
   const createMutation = useMutation({
@@ -39,6 +60,7 @@ const TasksPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       setNewTitle('')
+      setPage(1)
     },
     onError: err => {
       setActionError(err instanceof Error ? err.message : t('tasks.errors.createFailed'))
@@ -68,7 +90,9 @@ const TasksPage = () => {
     },
   })
 
-  const tasks = useMemo(() => data ?? [], [data])
+  const tasks = useMemo(() => data?.items ?? [], [data?.items])
+  const total = data?.total ?? 0
+  const totalPages = data?.totalPages ?? 1
   const isWorking = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
   const formatter = useMemo(
     () => new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }),
@@ -86,12 +110,23 @@ const TasksPage = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (!data) {
+      return
+    }
+
+    if (page > data.totalPages) {
+      setPage(data.totalPages)
+    }
+  }, [data, page])
+
   const submitNewTask = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const trimmed = newTitle.trim()
     if (!trimmed) {
       return
     }
+
     setActionError(null)
     createMutation.mutate(trimmed)
   }
@@ -107,10 +142,12 @@ const TasksPage = () => {
       setEditingId(null)
       return
     }
+
     if (trimmed === task.title) {
       setEditingId(null)
       return
     }
+
     setActionError(null)
     updateMutation.mutate({ id: task.id, data: { title: trimmed } })
   }
@@ -144,6 +181,78 @@ const TasksPage = () => {
             </Button>
           </Group>
         </form>
+      </Paper>
+
+      <Paper withBorder radius="sm" p={12} bg="var(--app-surface)">
+        <Group grow align="end">
+          <Select
+            label="Status"
+            data={[
+              { value: 'all', label: 'All' },
+              { value: 'todo', label: t('tasks.status.todo') },
+              { value: 'done', label: t('tasks.status.done') },
+            ]}
+            value={status}
+            onChange={next => {
+              if (!next) {
+                return
+              }
+              setStatus(next as TaskStatus)
+              setPage(1)
+            }}
+            disabled={isLoading}
+          />
+          <Select
+            label="Sort by"
+            data={[
+              { value: 'createdAt', label: 'Created time' },
+              { value: 'updatedAt', label: 'Updated time' },
+              { value: 'title', label: 'Title' },
+            ]}
+            value={sortBy}
+            onChange={next => {
+              if (!next) {
+                return
+              }
+              setSortBy(next as TaskSortBy)
+              setPage(1)
+            }}
+            disabled={isLoading}
+          />
+          <Select
+            label="Order"
+            data={[
+              { value: 'desc', label: 'Descending' },
+              { value: 'asc', label: 'Ascending' },
+            ]}
+            value={sortOrder}
+            onChange={next => {
+              if (!next) {
+                return
+              }
+              setSortOrder(next as TaskSortOrder)
+              setPage(1)
+            }}
+            disabled={isLoading}
+          />
+          <Select
+            label="Page size"
+            data={[
+              { value: '10', label: '10' },
+              { value: '20', label: '20' },
+              { value: '50', label: '50' },
+            ]}
+            value={String(pageSize)}
+            onChange={next => {
+              if (!next) {
+                return
+              }
+              setPageSize(Number(next))
+              setPage(1)
+            }}
+            disabled={isLoading}
+          />
+        </Group>
       </Paper>
 
       {actionError && (
@@ -188,6 +297,7 @@ const TasksPage = () => {
                 <Table.Th>{t('tasks.table.title')}</Table.Th>
                 <Table.Th>{t('tasks.table.status')}</Table.Th>
                 <Table.Th>{t('tasks.table.createdAt')}</Table.Th>
+                <Table.Th>Updated At</Table.Th>
                 <Table.Th style={{ width: 132 }}>{t('tasks.table.actions')}</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -231,6 +341,11 @@ const TasksPage = () => {
                     <Table.Td>
                       <Text size="sm" c="dimmed">
                         {formatter.format(new Date(task.createdAt))}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {formatter.format(new Date(task.updatedAt))}
                       </Text>
                     </Table.Td>
                     <Table.Td>
@@ -299,6 +414,35 @@ const TasksPage = () => {
             </Table.Tbody>
           </Table>
         </Paper>
+      )}
+
+      {!isLoading && !isError && (
+        <Group justify="space-between" align="center">
+          <Group gap={8}>
+            <Badge variant="light">Total: {total}</Badge>
+            <Badge variant="outline">
+              Page {page} / {totalPages}
+            </Badge>
+          </Group>
+          <Group gap={8}>
+            <Button
+              variant="default"
+              leftSection={<ChevronLeft size={14} />}
+              onClick={() => setPage(current => Math.max(1, current - 1))}
+              disabled={isLoading || page <= 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="default"
+              rightSection={<ChevronRight size={14} />}
+              onClick={() => setPage(current => Math.min(totalPages, current + 1))}
+              disabled={isLoading || page >= totalPages}
+            >
+              Next
+            </Button>
+          </Group>
+        </Group>
       )}
     </Stack>
   )

@@ -13,6 +13,17 @@ type TaskDto = {
   updatedAt: string
 }
 
+type TaskListDto = {
+  items: TaskDto[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+  sortBy: 'createdAt' | 'updatedAt' | 'title'
+  sortOrder: 'asc' | 'desc'
+  status: 'all' | 'todo' | 'done'
+}
+
 type SuccessEnvelope<T> = {
   data: T
   meta: {
@@ -109,9 +120,13 @@ describe('Todos API v1', () => {
 
     const listResponse = await app.fetch(await createAuthedRequest('/api/v1/todos'))
     expect(listResponse.status).toBe(200)
-    const listBody = (await listResponse.json()) as SuccessEnvelope<TaskDto[]>
-    expect(listBody.data).toHaveLength(1)
-    expect(listBody.data[0].id).toBe(createdBody.data.id)
+    const listBody = (await listResponse.json()) as SuccessEnvelope<TaskListDto>
+    expect(listBody.data.items).toHaveLength(1)
+    expect(listBody.data.items[0]?.id).toBe(createdBody.data.id)
+    expect(listBody.data.total).toBe(1)
+    expect(listBody.data.page).toBe(1)
+    expect(listBody.data.pageSize).toBe(10)
+    expect(listBody.data.totalPages).toBe(1)
 
     const updateResponse = await app.fetch(
       await createAuthedRequest(`/api/v1/todos/${createdBody.data.id}`, {
@@ -122,9 +137,8 @@ describe('Todos API v1', () => {
     )
 
     expect(updateResponse.status).toBe(200)
-    const updatedBody = (await updateResponse.json()) as SuccessEnvelope<TaskDto>
-    expect(updatedBody.data.title).toBe('Updated task')
-    expect(updatedBody.data.isDone).toBe(true)
+    const updatedBody = (await updateResponse.json()) as SuccessEnvelope<{ ok: true }>
+    expect(updatedBody.data.ok).toBe(true)
     expect(updateResponse.headers.get('x-request-id')).toBe(updatedBody.meta.requestId)
 
     const deleteResponse = await app.fetch(
@@ -159,9 +173,61 @@ describe('Todos API v1', () => {
 
     expect(patchResponse.status).toBe(400)
     const body = (await patchResponse.json()) as ErrorEnvelope
-    expect(body.error.code).toBe('TASK_NO_UPDATES')
-    expect(body.error.message).toBe('No updates provided')
+    expect(body.error.code).toBe('VALIDATION_ERROR')
+    expect(body.error.message).toBe('Invalid request')
     expect(patchResponse.headers.get('x-request-id')).toBe(body.error.requestId)
+  })
+
+  test('GET /api/v1/todos supports pagination, sorting, and status filters', async () => {
+    const createTask = async (title: string) =>
+      app.fetch(
+        await createAuthedRequest('/api/v1/todos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title }),
+        }),
+      )
+
+    const taskAResponse = await createTask('alpha')
+    const taskA = ((await taskAResponse.json()) as SuccessEnvelope<TaskDto>).data
+
+    const taskBResponse = await createTask('bravo')
+    const taskB = ((await taskBResponse.json()) as SuccessEnvelope<TaskDto>).data
+
+    await createTask('charlie')
+
+    await app.fetch(
+      await createAuthedRequest(`/api/v1/todos/${taskB.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isDone: true }),
+      }),
+    )
+
+    const pageResponse = await app.fetch(
+      await createAuthedRequest('/api/v1/todos?page=1&pageSize=2&sortBy=title&sortOrder=asc'),
+    )
+    expect(pageResponse.status).toBe(200)
+    const pageBody = (await pageResponse.json()) as SuccessEnvelope<TaskListDto>
+    expect(pageBody.data.items).toHaveLength(2)
+    expect(pageBody.data.total).toBe(3)
+    expect(pageBody.data.totalPages).toBe(2)
+    expect(pageBody.data.items[0]?.title).toBe('alpha')
+    expect(pageBody.data.items[1]?.title).toBe('bravo')
+
+    const doneOnlyResponse = await app.fetch(await createAuthedRequest('/api/v1/todos?status=done'))
+    expect(doneOnlyResponse.status).toBe(200)
+    const doneOnlyBody = (await doneOnlyResponse.json()) as SuccessEnvelope<TaskListDto>
+    expect(doneOnlyBody.data.items).toHaveLength(1)
+    expect(doneOnlyBody.data.items[0]?.id).toBe(taskB.id)
+
+    const todoOnlyResponse = await app.fetch(
+      await createAuthedRequest('/api/v1/todos?status=todo&sortBy=title&sortOrder=desc'),
+    )
+    expect(todoOnlyResponse.status).toBe(200)
+    const todoOnlyBody = (await todoOnlyResponse.json()) as SuccessEnvelope<TaskListDto>
+    expect(todoOnlyBody.data.items.map(task => task.id)).toContain(taskA.id)
+    expect(todoOnlyBody.data.items.map(task => task.id)).not.toContain(taskB.id)
   })
 
   test('PATCH/DELETE returns 404 when task does not exist', async () => {
