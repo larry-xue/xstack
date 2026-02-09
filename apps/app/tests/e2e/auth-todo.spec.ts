@@ -136,6 +136,27 @@ test.describe('auth and todos', () => {
     expect(Math.abs(rect.height - viewport.height)).toBeLessThanOrEqual(1)
   })
 
+  test('supports collapsing and expanding desktop sidebar', async ({ page }) => {
+    const credentials = createCredentials()
+    await signUp(page, credentials)
+
+    const sidebar = page.getByTestId('app-shell-sidebar')
+    await expect(sidebar).toHaveAttribute('data-collapsed', 'false')
+
+    const toggleSidebar = page.getByTestId('sidebar-toggle')
+    await expect(toggleSidebar).toBeVisible()
+    await toggleSidebar.click()
+    await expect(sidebar).toHaveAttribute('data-collapsed', 'true')
+
+    await openAccountMenu(page)
+    await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('sidebar-account-menu')).toBeHidden()
+
+    await page.getByTestId('sidebar-toggle').click()
+    await expect(sidebar).toHaveAttribute('data-collapsed', 'false')
+  })
+
   test('keeps mobile sidebar drawer interaction', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
 

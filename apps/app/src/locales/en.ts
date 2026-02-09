@@ -57,6 +57,7 @@ const en = {
     searchPlaceholder: 'Search projects...',
     addNew: 'Add New...',
     openNavigation: 'Open navigation',
+    toggleSidebar: 'Toggle sidebar',
     notifications: 'Notifications',
     filter: 'Filter',
     gridView: 'Grid view',

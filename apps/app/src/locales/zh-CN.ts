@@ -57,6 +57,7 @@ const zhCN = {
     searchPlaceholder: '搜索项目...',
     addNew: '新建...',
     openNavigation: '打开导航',
+    toggleSidebar: '收起或展开侧边栏',
     notifications: '通知',
     filter: '筛选',
     gridView: '网格视图',

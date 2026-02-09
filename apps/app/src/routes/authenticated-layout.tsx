@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from '@tanstack/react-router'
 import {
   AreaChart,
@@ -26,6 +26,7 @@ const AuthenticatedLayout = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { session, isLoading, signOut } = useAuth()
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const navItems: AppSidebarItem[] = [
     {
       key: 'overview',
@@ -96,21 +97,15 @@ const AuthenticatedLayout = () => {
   const sidebarSubtitle = t('authenticatedLayout.brand')
   const sidebarSection = t('authenticatedLayout.navigation')
 
-  const renderSidebarNav = () => (
-    <>
-      <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
-        {sidebarSection}
-      </p>
-      <SidebarNavList items={navItems} />
-    </>
-  )
-
   const renderSidebarFooter = () => (
-    <SidebarAccountMenu email={session?.user.email} onSignOut={handleSignOut} />
+    <SidebarAccountMenu
+      email={session?.user.email}
+      collapsed={isSidebarCollapsed}
+      onSignOut={handleSignOut}
+    />
   )
 
   const appShellSlots: AppShellSlots = {
-    sidebarNav: renderSidebarNav(),
     sidebarFooter: renderSidebarFooter(),
     headerStart: (
       <Sheet>
@@ -134,8 +129,10 @@ const AuthenticatedLayout = () => {
             subtitle={sidebarSubtitle}
             sectionLabel={sidebarSection}
             items={navItems}
-            navSlot={renderSidebarNav()}
-            footerSlot={renderSidebarFooter()}
+            navSlot={<SidebarNavList items={navItems} />}
+            footerSlot={
+              <SidebarAccountMenu email={session?.user.email} collapsed={false} onSignOut={handleSignOut} />
+            }
             className="border-0"
           />
         </SheetContent>
@@ -154,6 +151,9 @@ const AuthenticatedLayout = () => {
       header={{
         title: t('authenticatedLayout.nav.todos'),
       }}
+      sidebarCollapsed={isSidebarCollapsed}
+      onSidebarToggle={() => setIsSidebarCollapsed((prev) => !prev)}
+      sidebarToggleLabel={t('authenticatedLayout.toggleSidebar')}
       slots={appShellSlots}
     >
       {isLoading ? (
