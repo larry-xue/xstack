@@ -1,13 +1,18 @@
 import { Languages } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-const LanguageSwitcher = ({ className = '' }: { className?: string }) => {
+type LanguageSwitcherProps = {
+  className?: string
+  showIcon?: boolean
+}
+
+const LanguageSwitcher = ({ className = '', showIcon = true }: LanguageSwitcherProps) => {
   const { t, i18n } = useTranslation()
   const currentLanguage = i18n.resolvedLanguage?.startsWith('zh') ? 'zh-CN' : 'en'
 
   return (
     <label className={`inline-flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
-      <Languages className="size-3.5 text-muted-foreground/80" aria-hidden />
+      {showIcon && <Languages className="size-3.5 text-muted-foreground/80" aria-hidden />}
       <select
         aria-label={t('common.language')}
         title={t('common.language')}

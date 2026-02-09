@@ -2,6 +2,8 @@ const en = {
   common: {
     language: 'Language',
     theme: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
     languages: {
       en: 'English',
       zhCN: 'Chinese (Simplified)',

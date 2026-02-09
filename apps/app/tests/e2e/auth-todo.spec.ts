@@ -30,16 +30,29 @@ const login = async (page: Page, credentials: Credentials) => {
   await expect(page).toHaveURL(/\/app\/todos$/)
 }
 
+const openAccountMenu = async (page: Page) => {
+  const trigger = page.getByTestId('sidebar-account-trigger')
+  await expect(trigger).toBeVisible()
+  await trigger.click()
+  await expect(page.getByTestId('sidebar-account-menu')).toBeVisible()
+}
+
+const signOutFromAccountMenu = async (page: Page) => {
+  await openAccountMenu(page)
+  await page.getByRole('menuitem', { name: 'Sign out' }).click()
+}
+
 test.describe('auth and todos', () => {
   test('supports sign up and sign in', async ({ page }) => {
     const credentials = createCredentials()
 
     await signUp(page, credentials)
-    await page.getByRole('button', { name: 'Sign out' }).click()
+    await signOutFromAccountMenu(page)
     await expect(page).toHaveURL(/\/auth$/)
 
     await login(page, credentials)
-    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+    await openAccountMenu(page)
+    await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
   })
 
   test('supports todo create, toggle, edit and delete', async ({ page }) => {
@@ -102,8 +115,10 @@ test.describe('auth and todos', () => {
 
     const shell = page.getByTestId('app-shell-root')
     await expect(shell).toBeVisible()
-    await expect(page.getByRole('switch', { name: 'Theme' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+    await openAccountMenu(page)
+    await expect(page.getByRole('menuitem', { name: 'Theme' })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Language' })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
 
     const viewport = page.viewportSize()
     if (!viewport) {

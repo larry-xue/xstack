@@ -2,6 +2,8 @@ const zhCN = {
   common: {
     language: '语言',
     theme: '主题',
+    themeLight: '浅色',
+    themeDark: '深色',
     languages: {
       en: 'English',
       zhCN: '简体中文',

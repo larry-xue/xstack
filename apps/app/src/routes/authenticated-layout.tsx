@@ -12,13 +12,11 @@ import {
   Server,
   ShieldCheck,
   Store,
-  UserRound,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import SidebarAccountMenu from '@/components/layout/sidebar-account-menu'
 import AppShell, { type AppShellSlots } from '@/components/layout/app-shell'
 import AppSidebar, { SidebarNavList, type AppSidebarItem } from '@/components/layout/app-sidebar'
-import LanguageSwitcher from '@/components/language-switcher'
-import ThemeToggle from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -108,23 +106,7 @@ const AuthenticatedLayout = () => {
   )
 
   const renderSidebarFooter = () => (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <ThemeToggle />
-        <LanguageSwitcher />
-      </div>
-      <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/35 p-3">
-        <div className="flex items-center gap-2">
-          <UserRound className="size-4 text-sidebar-foreground/70" aria-hidden />
-          <p className="truncate text-sm font-semibold text-sidebar-foreground">
-            {session?.user.email ?? t('common.loading')}
-          </p>
-        </div>
-        <Button className="mt-3 w-full" variant="outline" onClick={handleSignOut}>
-          {t('authenticatedLayout.signOut')}
-        </Button>
-      </div>
-    </div>
+    <SidebarAccountMenu email={session?.user.email} onSignOut={handleSignOut} />
   )
 
   const appShellSlots: AppShellSlots = {
