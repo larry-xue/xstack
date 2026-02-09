@@ -1,4 +1,4 @@
-import { jwtVerify } from 'jose'
+import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from 'jose'
 
 type RuntimeEnv = Record<string, string | undefined>
 const getRuntimeEnv = (): RuntimeEnv =>
@@ -14,7 +14,11 @@ const getJwtSecret = () => {
 
 const getJwtIssuer = () => {
   const issuer = getRuntimeEnv().SUPABASE_JWT_ISS
-  return issuer && issuer.length > 0 ? issuer : undefined
+  if (issuer && issuer.length > 0) {
+    return issuer
+  }
+
+  return null;
 }
 
 export type AuthContext = {
@@ -41,11 +45,57 @@ export const getBearerToken = (request: Request): string | null => {
   return token
 }
 
-export const verifySupabaseJwt = async (token: string): Promise<AuthContext> => {
+let remoteJwks: ReturnType<typeof createRemoteJWKSet> | null = null
+
+const getJwksUrl = () => {
+  const explicit = getRuntimeEnv().SUPABASE_JWKS_URL
+  if (explicit && explicit.length > 0) {
+    return explicit
+  }
+
   const issuer = getJwtIssuer()
-  const { payload } = await jwtVerify(token, getJwtSecret(),
-    issuer ? { issuer } : undefined,
-  )
+  if (!issuer) {
+    return undefined
+  }
+
+  return `${issuer.replace(/\/$/, '')}/.well-known/jwks.json`
+}
+
+const getRemoteJwks = () => {
+  if (remoteJwks) {
+    return remoteJwks
+  }
+
+  const jwksUrl = getJwksUrl()
+  if (!jwksUrl) {
+    throw new Error('SUPABASE_JWKS_URL or SUPABASE_JWT_ISS is required')
+  }
+
+  remoteJwks = createRemoteJWKSet(new URL(jwksUrl))
+  return remoteJwks
+}
+
+const verifyWithSharedSecret = async (token: string) => {
+  const issuer = getJwtIssuer()
+  return jwtVerify(token, getJwtSecret(), issuer ? { issuer } : undefined)
+}
+
+const verifyWithJwks = async (token: string) => {
+  const issuer = getJwtIssuer()
+  return jwtVerify(token, getRemoteJwks(), issuer ? { issuer } : undefined)
+}
+
+export const verifySupabaseJwt = async (token: string): Promise<AuthContext> => {
+  const { alg } = decodeProtectedHeader(token)
+
+  if (!alg) {
+    throw new Error('Token algorithm is missing')
+  }
+
+  const isHmac = alg.toUpperCase().startsWith('HS')
+  const { payload } = isHmac
+    ? await verifyWithSharedSecret(token)
+    : await verifyWithJwks(token)
 
   const userId = typeof payload.sub === 'string' ? payload.sub : null
   const role = typeof payload.role === 'string' ? payload.role : null

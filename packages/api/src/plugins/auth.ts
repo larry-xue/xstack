@@ -10,7 +10,7 @@ export type AuthContext = SupabaseAuthContext
 
 const authPlugin = new Elysia()
   .derive(
-    { as: 'scoped' },
+    { as: 'global' },
     async ({ request }): Promise<{ auth: AuthContext | null }> => {
     const token = getBearerToken(request)
     if (!token) {
