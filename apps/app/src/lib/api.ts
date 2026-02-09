@@ -1,6 +1,6 @@
 import { getAccessToken } from './auth'
 
-export type Todo = {
+export type Task = {
   id: string
   title: string
   isDone: boolean
@@ -50,21 +50,21 @@ const request = async <T>(
   return (await response.json()) as T
 }
 
-export const getTodos = () => request<Todo[]>('/api/todos')
+export const getTasks = () => request<Task[]>('/api/todos')
 
-export const createTodo = (title: string) =>
-  request<Todo>('/api/todos', {
+export const createTask = (title: string) =>
+  request<Task>('/api/todos', {
     method: 'POST',
     body: JSON.stringify({ title }),
   })
 
-export const updateTodo = (id: string, data: { title?: string; isDone?: boolean }) =>
-  request<Todo>(`/api/todos/${id}`, {
+export const updateTask = (id: string, data: { title?: string; isDone?: boolean }) =>
+  request<Task>(`/api/todos/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
 
-export const deleteTodo = (id: string) =>
+export const deleteTask = (id: string) =>
   request<{ ok: true }>(`/api/todos/${id}`, {
     method: 'DELETE',
   })

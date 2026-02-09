@@ -15,19 +15,19 @@ const createCredentials = (): Credentials => {
 
 const signUp = async (page: Page, credentials: Credentials) => {
   await page.goto('/auth')
-  await page.getByRole('radio', { name: 'Sign up' }).click()
-  await page.getByLabel('Email address').fill(credentials.email)
+  await page.getByRole('button', { name: 'Sign up' }).click()
+  await page.getByLabel('Email').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page).toHaveURL(/\/app\/todos$/)
+  await expect(page).toHaveURL(/\/app\/home$/)
 }
 
 const login = async (page: Page, credentials: Credentials) => {
   await page.goto('/auth')
-  await page.getByLabel('Email address').fill(credentials.email)
+  await page.getByLabel('Email').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Sign in' }).click()
-  await expect(page).toHaveURL(/\/app\/todos$/)
+  await expect(page).toHaveURL(/\/app\/home$/)
 }
 
 const openAccountMenu = async (page: Page) => {
@@ -42,7 +42,7 @@ const signOutFromAccountMenu = async (page: Page) => {
   await page.getByRole('menuitem', { name: 'Sign out' }).click()
 }
 
-test.describe('auth and todos', () => {
+test.describe('auth and tasks', () => {
   test('supports sign up and sign in', async ({ page }) => {
     const credentials = createCredentials()
 
@@ -55,124 +55,63 @@ test.describe('auth and todos', () => {
     await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
   })
 
-  test('supports todo create, toggle, edit and delete', async ({ page }) => {
+  test('supports task create, toggle, edit and delete', async ({ page }) => {
     const credentials = createCredentials()
-    const initialTitle = `todo-${Date.now()}`
+    const initialTitle = `task-${Date.now()}`
     const updatedTitle = `${initialTitle}-updated`
 
     await signUp(page, credentials)
+    await page.getByRole('button', { name: 'Tasks' }).click()
+    await expect(page).toHaveURL(/\/app\/tasks$/)
 
     const input = page.getByPlaceholder('Add a new task')
     await input.fill(initialTitle)
-    await page.getByRole('button', { name: 'Add todo' }).click()
+    await page.getByRole('button', { name: 'Add task' }).click()
 
-    const item = page.locator('li', { hasText: initialTitle })
-    await expect(item).toBeVisible()
+    const row = page.getByRole('row', { name: new RegExp(initialTitle) })
+    await expect(row).toBeVisible()
 
-    await item.getByRole('button', { name: 'Mark as done' }).click()
-    await expect(item.getByRole('button', { name: 'Mark as not done' })).toBeVisible()
+    await row.getByRole('button', { name: 'Mark as done' }).click()
+    await expect(row.getByText('Done')).toBeVisible()
 
-    await item.getByRole('button', { name: 'Edit' }).click()
-    await item.getByRole('textbox').fill(updatedTitle)
-    await item.getByRole('button', { name: 'Save' }).click()
-    await expect(page.locator('li', { hasText: updatedTitle })).toBeVisible()
+    await row.getByRole('button', { name: 'Edit task' }).click()
+    await row.getByRole('textbox').fill(updatedTitle)
+    await row.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByRole('row', { name: new RegExp(updatedTitle) })).toBeVisible()
 
-    const updatedItem = page.locator('li', { hasText: updatedTitle })
-    await updatedItem.getByRole('button', { name: 'Delete' }).click()
-    await expect(updatedItem).toHaveCount(0)
+    const updatedRow = page.getByRole('row', { name: new RegExp(updatedTitle) })
+    await updatedRow.getByRole('button', { name: 'Delete task' }).click()
+    await expect(updatedRow).toHaveCount(0)
   })
 
-  test('keeps selected theme after authentication', async ({ page }) => {
+  test('persists theme and language preferences from settings', async ({ page }) => {
     const credentials = createCredentials()
-
-    await page.goto('/auth')
-
-    const themeSwitch = page.getByRole('switch', { name: 'Theme' })
-    await expect(themeSwitch).toBeVisible()
-    const startedDark = await page.evaluate(() =>
-      document.documentElement.classList.contains('dark'),
-    )
-    await themeSwitch.click()
-
-    const expectedTheme = startedDark ? 'light' : 'dark'
-    const expectedDark = !startedDark
-
     await signUp(page, credentials)
 
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await expect(page).toHaveURL(/\/app\/settings$/)
+
+    await page.getByRole('button', { name: 'Dark' }).click()
+    await page.getByRole('radio', { name: 'Chinese (Simplified)' }).click()
+    await page.reload()
+
+    await expect(page.locator('html')).toHaveAttribute('data-mantine-color-scheme', 'dark')
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
     await expect
-      .poll(async () =>
-        page.evaluate(() => document.documentElement.classList.contains('dark')),
-      )
-      .toBe(expectedDark)
+      .poll(async () => page.evaluate(() => window.localStorage.getItem('xstack-color-scheme')))
+      .toBe('dark')
     await expect
-      .poll(async () => page.evaluate(() => window.localStorage.getItem('theme')))
-      .toBe(expectedTheme)
+      .poll(async () => page.evaluate(() => window.localStorage.getItem('lang')))
+      .toBe('zh-CN')
   })
 
-  test('renders full-bleed app shell and sidebar footer controls', async ({ page }) => {
+  test('supports command palette navigation', async ({ page }) => {
     const credentials = createCredentials()
     await signUp(page, credentials)
 
-    const shell = page.getByTestId('app-shell-root')
-    await expect(shell).toBeVisible()
-    await expect(page.getByTestId('sidebar-nav-list').first()).toHaveClass(/space-y-0/)
-    await openAccountMenu(page)
-    await expect(page.getByRole('menuitem', { name: 'Theme' })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Language' })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
-    await page.keyboard.press('Escape')
-    await expect(page.getByTestId('sidebar-account-menu')).toBeHidden()
-
-    const titleAlignment = await page.evaluate(() => {
-      const headerTitle = document.querySelector('[data-testid="app-shell-header"] h2')
-      const contentTitle = document.querySelector('[data-testid="todos-title"]')
-      if (!headerTitle || !contentTitle) {
-        return null
-      }
-      const headerRect = headerTitle.getBoundingClientRect()
-      const contentRect = contentTitle.getBoundingClientRect()
-      return Math.abs(contentRect.x - headerRect.x)
-    })
-
-    expect(titleAlignment).not.toBeNull()
-    expect(titleAlignment ?? 99).toBeLessThanOrEqual(1)
-    await expect(page.locator('[data-testid="todos-page"] [data-slot="card"]')).toHaveCount(0)
-
-    const viewport = page.viewportSize()
-    if (!viewport) {
-      throw new Error('Viewport size is unavailable')
-    }
-
-    const rect = await shell.evaluate((node) => {
-      const { x, y, width, height } = node.getBoundingClientRect()
-      return { x, y, width, height }
-    })
-
-    expect(rect.x).toBe(0)
-    expect(rect.y).toBe(0)
-    expect(Math.abs(rect.width - viewport.width)).toBeLessThanOrEqual(1)
-    expect(Math.abs(rect.height - viewport.height)).toBeLessThanOrEqual(1)
-  })
-
-  test('supports collapsing and expanding desktop sidebar', async ({ page }) => {
-    const credentials = createCredentials()
-    await signUp(page, credentials)
-
-    const sidebar = page.getByTestId('app-shell-sidebar')
-    await expect(sidebar).toHaveAttribute('data-collapsed', 'false')
-
-    const toggleSidebar = page.getByTestId('sidebar-toggle')
-    await expect(toggleSidebar).toBeVisible()
-    await toggleSidebar.click()
-    await expect(sidebar).toHaveAttribute('data-collapsed', 'true')
-
-    await openAccountMenu(page)
-    await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible()
-    await page.keyboard.press('Escape')
-    await expect(page.getByTestId('sidebar-account-menu')).toBeHidden()
-
-    await page.getByTestId('sidebar-toggle').click()
-    await expect(sidebar).toHaveAttribute('data-collapsed', 'false')
+    await page.keyboard.press('Control+K')
+    await page.getByRole('option', { name: /Projects/ }).click()
+    await expect(page).toHaveURL(/\/app\/projects$/)
   })
 
   test('keeps mobile sidebar drawer interaction', async ({ page }) => {
@@ -184,7 +123,6 @@ test.describe('auth and todos', () => {
     const openNavButton = page.getByRole('button', { name: 'Open navigation' })
     await expect(openNavButton).toBeVisible()
     await openNavButton.click()
-
-    await expect(page.getByRole('link', { name: 'Todos' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Tasks' })).toBeVisible()
   })
 })

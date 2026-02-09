@@ -1,13 +1,21 @@
 import { useState, type FormEvent } from 'react'
+import {
+  Alert,
+  Anchor,
+  Button,
+  Center,
+  Paper,
+  PasswordInput,
+  SegmentedControl,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
+import { AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { supabase } from '../lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 const AuthPage = () => {
   const { t } = useTranslation()
@@ -26,10 +34,7 @@ const AuthPage = () => {
     setIsLoading(true)
 
     if (mode === 'login') {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
       if (signInError) {
         setError(signInError.message)
@@ -37,15 +42,11 @@ const AuthPage = () => {
         return
       }
 
-      await navigate({ to: '/app/todos' })
+      await navigate({ to: '/app/home' })
       return
     }
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
     if (signUpError) {
       setError(signUpError.message)
       setIsLoading(false)
@@ -53,107 +54,99 @@ const AuthPage = () => {
     }
 
     if (data.session) {
-      await navigate({ to: '/app/todos' })
+      await navigate({ to: '/app/home' })
       return
     }
 
-    setNotice(t('authPage.panel.signupNotice'))
+    setNotice(t('auth.signupNotice'))
     setIsLoading(false)
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md items-center px-4 py-8">
-      <Card className="w-full border-border/80 bg-card/90 shadow-soft-md">
-        <CardHeader className="gap-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="font-display text-2xl">
-                {mode === 'login'
-                  ? t('authPage.panel.welcomeBack')
-                  : t('authPage.panel.createAccount')}
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {t('authPage.hero.description')}
-              </p>
-            </div>
-            <ToggleGroup
-              type="single"
-              value={mode}
-              onValueChange={(value) => {
-                if (value === 'login' || value === 'signup') {
-                  setMode(value)
-                }
-              }}
-            >
-              <ToggleGroupItem value="login" aria-label={t('authPage.panel.modeLogin')} disabled={isLoading}>
-                {t('authPage.panel.modeLogin')}
-              </ToggleGroupItem>
-              <ToggleGroupItem value="signup" aria-label={t('authPage.panel.modeSignup')} disabled={isLoading}>
-                {t('authPage.panel.modeSignup')}
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-        </CardHeader>
+    <Center mih="100vh" px="md" py={36}>
+      <Paper
+        shadow="sm"
+        radius="md"
+        withBorder
+        p={{ base: 20, sm: 26 }}
+        w="100%"
+        maw={460}
+        bg="var(--app-surface)"
+      >
+        <Stack gap={18}>
+          <Stack gap={4}>
+            <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+              {t('common.productName')}
+            </Text>
+            <Title order={2} fw={600}>
+              {mode === 'login' ? t('auth.welcomeBack') : t('auth.createAccount')}
+            </Title>
+            <Text size="sm" c="dimmed">
+              {t('auth.description')}
+            </Text>
+          </Stack>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('authPage.panel.email')}</Label>
-              <Input
-                id="email"
+          <SegmentedControl
+            value={mode}
+            onChange={(value) => {
+              if (value === 'login' || value === 'signup') {
+                setMode(value)
+              }
+            }}
+            fullWidth
+            data={[
+              { label: t('auth.modeLogin'), value: 'login' },
+              { label: t('auth.modeSignup'), value: 'signup' },
+            ]}
+          />
+
+          <form onSubmit={handleSubmit}>
+            <Stack gap={12}>
+              <TextInput
+                label={t('auth.email')}
                 type="email"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => setEmail(event.currentTarget.value)}
                 required
                 disabled={isLoading}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('authPage.panel.password')}</Label>
-              <Input
-                id="password"
-                type="password"
+              <PasswordInput
+                label={t('auth.password')}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 minLength={6}
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) => setPassword(event.currentTarget.value)}
                 required
                 disabled={isLoading}
               />
-            </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertTitle>{t('authPage.panel.errorTitle')}</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            {notice && (
-              <Alert>
-                <AlertTitle>{t('authPage.panel.noticeTitle')}</AlertTitle>
-                <AlertDescription>{notice}</AlertDescription>
-              </Alert>
-            )}
+              {error && (
+                <Alert color="red" title={t('auth.errorTitle')} icon={<AlertCircle size={16} />}>
+                  {error}
+                </Alert>
+              )}
+              {notice && (
+                <Alert color="blue" title={t('auth.noticeTitle')} icon={<AlertCircle size={16} />}>
+                  {notice}
+                </Alert>
+              )}
 
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading
-                ? t('authPage.panel.loading')
-                : mode === 'login'
-                  ? t('authPage.panel.submitLogin')
-                  : t('authPage.panel.submitSignup')}
-            </Button>
+              <Button type="submit" loading={isLoading}>
+                {mode === 'login' ? t('auth.submitLogin') : t('auth.submitSignup')}
+              </Button>
+            </Stack>
           </form>
-        </CardContent>
 
-        <CardFooter>
-          <p className="text-xs text-muted-foreground">
-            {t('authPage.panel.policy')}
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+          <Text size="xs" c="dimmed">
+            {t('auth.policyPrefix')}{' '}
+            <Anchor size="xs" underline="always">
+              {t('auth.policyLink')}
+            </Anchor>
+          </Text>
+        </Stack>
+      </Paper>
+    </Center>
   )
 }
 

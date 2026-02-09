@@ -1,160 +1,106 @@
-import { useEffect, useState } from 'react'
-import { Outlet, useNavigate } from '@tanstack/react-router'
-import {
-  AreaChart,
-  Boxes,
-  Bot,
-  FolderKanban,
-  Globe,
-  LayoutGrid,
-  ListChecks,
-  Menu,
-  Server,
-  ShieldCheck,
-  Store,
-} from 'lucide-react'
+import { useEffect, useMemo } from 'react'
+import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+import { spotlight } from '@mantine/spotlight'
+import { FolderKanban, Home, Inbox, Search, Settings, SquareCheckBig } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import SidebarAccountMenu from '@/components/layout/sidebar-account-menu'
-import AppShell, { type AppShellSlots } from '@/components/layout/app-shell'
-import AppSidebar, { SidebarNavList, type AppSidebarItem } from '@/components/layout/app-sidebar'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { useAuth } from '../providers/auth'
+import { CommandPalette } from '@/components/workspace/command-palette'
+import { WorkspaceShell } from '@/components/workspace/workspace-shell'
+import type { WorkspaceNavItem } from '@/components/workspace/workspace-sidebar'
+import { useAuth } from '@/providers/auth'
 
 const AuthenticatedLayout = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
   const { session, isLoading, signOut } = useAuth()
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-  const navItems: AppSidebarItem[] = [
-    {
-      key: 'overview',
-      label: t('authenticatedLayout.nav.overview'),
-      icon: LayoutGrid,
-    },
-    {
-      key: 'projects',
-      label: t('authenticatedLayout.nav.projects'),
-      icon: FolderKanban,
-    },
-    {
-      key: 'deployments',
-      label: t('authenticatedLayout.nav.deployments'),
-      icon: Boxes,
-    },
-    {
-      key: 'analytics',
-      label: t('authenticatedLayout.nav.analytics'),
-      icon: AreaChart,
-    },
-    {
-      key: 'observability',
-      label: t('authenticatedLayout.nav.observability'),
-      icon: ShieldCheck,
-    },
-    {
-      key: 'domains',
-      label: t('authenticatedLayout.nav.domains'),
-      icon: Globe,
-    },
-    {
-      key: 'integrations',
-      label: t('authenticatedLayout.nav.integrations'),
-      icon: Store,
-    },
-    {
-      key: 'ai-gateway',
-      label: t('authenticatedLayout.nav.aiGateway'),
-      icon: Bot,
-    },
-    {
-      key: 'sandboxes',
-      label: t('authenticatedLayout.nav.sandboxes'),
-      icon: Server,
-    },
-    {
-      key: 'todos',
-      label: t('authenticatedLayout.nav.todos'),
-      icon: ListChecks,
-      to: '/app/todos',
-      badge: t('authenticatedLayout.nav.live'),
-    },
-  ]
 
   useEffect(() => {
     if (!isLoading && !session) {
-      navigate({ to: '/auth' })
+      void navigate({ to: '/auth' })
     }
   }, [isLoading, navigate, session])
 
-  const handleSignOut = async () => {
-    await signOut()
-    await navigate({ to: '/auth' })
-  }
-
-  const sidebarTitle = t('authenticatedLayout.brand')
-
-  const renderSidebarFooter = () => (
-    <SidebarAccountMenu
-      email={session?.user.email}
-      collapsed={isSidebarCollapsed}
-      onSignOut={handleSignOut}
-    />
+  const navItems = useMemo<WorkspaceNavItem[]>(
+    () => [
+      {
+        key: 'home',
+        label: t('shell.nav.home'),
+        icon: Home,
+        to: '/app/home',
+      },
+      {
+        key: 'search',
+        label: t('shell.nav.search'),
+        icon: Search,
+        onClick: () => {
+          spotlight.open()
+        },
+      },
+      {
+        key: 'inbox',
+        label: t('shell.nav.inbox'),
+        icon: Inbox,
+        to: '/app/inbox',
+      },
+      {
+        key: 'tasks',
+        label: t('shell.nav.tasks'),
+        icon: SquareCheckBig,
+        to: '/app/tasks',
+      },
+      {
+        key: 'projects',
+        label: t('shell.nav.projects'),
+        icon: FolderKanban,
+        to: '/app/projects',
+      },
+      {
+        key: 'settings',
+        label: t('shell.nav.settings'),
+        icon: Settings,
+        to: '/app/settings',
+      },
+    ],
+    [t],
   )
 
-  const appShellSlots: AppShellSlots = {
-    sidebarFooter: renderSidebarFooter(),
-    headerStart: (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="lg:hidden"
-            aria-label={t('authenticatedLayout.openNavigation')}
-          >
-            <Menu className="size-4" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-60 p-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>{sidebarTitle}</SheetTitle>
-            <SheetDescription>{t('authenticatedLayout.openNavigation')}</SheetDescription>
-          </SheetHeader>
-          <AppSidebar
-            title={sidebarTitle}
-            items={navItems}
-            navSlot={<SidebarNavList items={navItems} />}
-            footerSlot={
-              <SidebarAccountMenu email={session?.user.email} collapsed={false} onSignOut={handleSignOut} />
-            }
-            className="border-0"
-          />
-        </SheetContent>
-      </Sheet>
-    ),
+  const pageTitleMap: Record<string, string> = {
+    '/app/home': t('shell.nav.home'),
+    '/app/inbox': t('shell.nav.inbox'),
+    '/app/tasks': t('shell.nav.tasks'),
+    '/app/projects': t('shell.nav.projects'),
+    '/app/settings': t('shell.nav.settings'),
+  }
+
+  if (isLoading) {
+    return null
+  }
+
+  if (!session) {
+    return null
   }
 
   return (
-    <AppShell
-      sidebar={{
-        title: sidebarTitle,
-        items: navItems,
-      }}
-      header={{
-        title: t('authenticatedLayout.nav.todos'),
-      }}
-      sidebarCollapsed={isSidebarCollapsed}
-      onSidebarToggle={() => setIsSidebarCollapsed((prev) => !prev)}
-      sidebarToggleLabel={t('authenticatedLayout.toggleSidebar')}
-      slots={appShellSlots}
-    >
-      {isLoading ? (
-        <div className="py-6 text-sm text-muted-foreground">{t('authenticatedLayout.loadingSession')}</div>
-      ) : (
+    <>
+      <CommandPalette />
+      <WorkspaceShell
+        title={pageTitleMap[pathname] ?? t('shell.workspaceLabel')}
+        currentPath={pathname}
+        navItems={navItems}
+        onNavigate={(to) => {
+          void navigate({ to })
+        }}
+        onSignOut={async () => {
+          await signOut()
+          await navigate({ to: '/auth' })
+        }}
+        email={session.user.email}
+      >
         <Outlet />
-      )}
-    </AppShell>
+      </WorkspaceShell>
+    </>
   )
 }
 

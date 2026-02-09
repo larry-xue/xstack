@@ -1,32 +1,39 @@
-import {
-  createRootRoute,
-  createRoute,
-  createRouter,
-  redirect,
-} from '@tanstack/react-router'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import App from './App'
-import AuthPage from './routes/auth-page'
-import TodosPage from './routes/todos-page'
-import AuthenticatedLayout from './routes/authenticated-layout'
-import { getSession } from './lib/auth'
+import { Alert, Button, Center, Paper, Stack, Text, Title } from '@mantine/core'
+import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import App from './App'
+import { getSession } from './lib/auth'
+import AuthPage from './routes/auth-page'
+import AuthenticatedLayout from './routes/authenticated-layout'
+import HomePage from './routes/home-page'
+import InboxPage from './routes/inbox-page'
+import ProjectsPage from './routes/projects-page'
+import SettingsPage from './routes/settings-page'
+import TasksPage from './routes/tasks-page'
 
 const NotFoundPage = () => {
   const { t } = useTranslation()
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-      <Card className="w-full border-border/80 bg-card/85 text-center">
-        <CardHeader>
-          <p className="text-sm font-semibold text-muted-foreground">{t('router.notFound.code')}</p>
-          <CardTitle className="mt-1 font-display text-2xl">{t('router.notFound.title')}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          {t('router.notFound.description')}
-        </CardContent>
-      </Card>
-    </div>
+    <Center mih="100vh" px="md">
+      <Paper withBorder radius="sm" p={26} w="100%" maw={500} bg="var(--app-surface)">
+        <Stack gap={8}>
+          <Text size="xs" fw={700} c="dimmed" tt="uppercase">
+            {t('router.notFound.code')}
+          </Text>
+          <Title order={2} fw={600}>
+            {t('router.notFound.title')}
+          </Title>
+          <Text c="dimmed">{t('router.notFound.description')}</Text>
+          <Alert color="gray" variant="light">
+            {t('router.notFound.hint')}
+          </Alert>
+          <Button component="a" href="/app/home" variant="light" w="fit-content">
+            {t('router.notFound.backHome')}
+          </Button>
+        </Stack>
+      </Paper>
+    </Center>
   )
 }
 
@@ -39,7 +46,7 @@ const indexRoute = createRoute({
   path: '/',
   beforeLoad: async () => {
     const session = await getSession()
-    throw redirect({ to: session ? '/app/todos' : '/auth' })
+    throw redirect({ to: session ? '/app/home' : '/auth' })
   },
   component: () => null,
 })
@@ -50,7 +57,7 @@ const authRoute = createRoute({
   beforeLoad: async () => {
     const session = await getSession()
     if (session) {
-      throw redirect({ to: '/app/todos' })
+      throw redirect({ to: '/app/home' })
     }
   },
   component: AuthPage,
@@ -68,16 +75,66 @@ const appRoute = createRoute({
   component: AuthenticatedLayout,
 })
 
-const todosRoute = createRoute({
+const appIndexRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/',
+  component: () => null,
+  beforeLoad: () => {
+    throw redirect({ to: '/app/home' })
+  },
+})
+
+const homeRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/home',
+  component: HomePage,
+})
+
+const inboxRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/inbox',
+  component: InboxPage,
+})
+
+const tasksRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/tasks',
+  component: TasksPage,
+})
+
+const projectsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/projects',
+  component: ProjectsPage,
+})
+
+const settingsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/settings',
+  component: SettingsPage,
+})
+
+const todosCompatRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/todos',
-  component: TodosPage,
+  component: () => null,
+  beforeLoad: () => {
+    throw redirect({ to: '/app/tasks' })
+  },
 })
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   authRoute,
-  appRoute.addChildren([todosRoute]),
+  appRoute.addChildren([
+    appIndexRoute,
+    homeRoute,
+    inboxRoute,
+    tasksRoute,
+    projectsRoute,
+    settingsRoute,
+    todosCompatRoute,
+  ]),
 ])
 
 export const router = createRouter({
