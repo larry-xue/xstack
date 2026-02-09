@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../providers/auth'
 
 const AuthenticatedLayout = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { session, isLoading, signOut } = useAuth()
 
@@ -27,20 +29,22 @@ const AuthenticatedLayout = () => {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                XStack Starter
+                {t('authenticatedLayout.brand')}
               </p>
-              <p className="font-display text-lg text-slate-900">Authenticated workspace</p>
+              <p className="font-display text-lg text-slate-900">
+                {t('authenticatedLayout.title')}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-xs text-slate-500">Signed in</p>
+              <p className="text-xs text-slate-500">{t('authenticatedLayout.signedIn')}</p>
               <p className="text-sm font-semibold text-slate-800">
-                {session?.user.email ?? 'Loading...'}
+                {session?.user.email ?? t('common.loading')}
               </p>
             </div>
             <button className="btn-outline" type="button" onClick={handleSignOut}>
-              Sign out
+              {t('authenticatedLayout.signOut')}
             </button>
           </div>
         </div>
@@ -49,15 +53,15 @@ const AuthenticatedLayout = () => {
             to="/app/todos"
             className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-slate-300"
           >
-            Todos
+            {t('authenticatedLayout.todos')}
           </Link>
-          <span className="text-xs text-slate-400">Protected route example</span>
+          <span className="text-xs text-slate-400">{t('authenticatedLayout.routeHint')}</span>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-6 py-10">
         {isLoading ? (
-          <div className="card">Loading session...</div>
+          <div className="card">{t('authenticatedLayout.loadingSession')}</div>
         ) : (
           <Outlet />
         )}

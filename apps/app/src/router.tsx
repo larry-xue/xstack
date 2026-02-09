@@ -9,6 +9,23 @@ import AuthPage from './routes/auth-page'
 import TodosPage from './routes/todos-page'
 import AuthenticatedLayout from './routes/authenticated-layout'
 import { getSession } from './lib/auth'
+import { useTranslation } from 'react-i18next'
+
+const NotFoundPage = () => {
+  const { t } = useTranslation()
+
+  return (
+    <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
+      <div className="card w-full text-center">
+        <p className="text-sm font-semibold text-slate-500">{t('router.notFound.code')}</p>
+        <h1 className="mt-2 font-display text-2xl text-slate-900">
+          {t('router.notFound.title')}
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">{t('router.notFound.description')}</p>
+      </div>
+    </div>
+  )
+}
 
 const rootRoute = createRootRoute({
   component: App,
@@ -64,17 +81,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   notFoundMode: 'fuzzy',
-  defaultNotFoundComponent: () => (
-    <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-6">
-      <div className="card w-full text-center">
-        <p className="text-sm font-semibold text-slate-500">404</p>
-        <h1 className="mt-2 font-display text-2xl text-slate-900">Page not found</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          The page you are looking for does not exist.
-        </p>
-      </div>
-    </div>
-  ),
+  defaultNotFoundComponent: NotFoundPage,
 })
 
 declare module '@tanstack/react-router' {

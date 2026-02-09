@@ -5,6 +5,7 @@ import './index.css'
 import { RouterProvider } from '@tanstack/react-router'
 import { AuthProvider } from './providers/auth'
 import { router } from './router'
+import './i18n'
 
 const queryClient = new QueryClient()
 

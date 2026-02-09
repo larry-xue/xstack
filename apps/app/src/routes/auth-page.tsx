@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 
 const AuthPage = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
@@ -49,7 +51,7 @@ const AuthPage = () => {
       return
     }
 
-    setNotice('Check your email to confirm your account before signing in.')
+    setNotice(t('authPage.panel.signupNotice'))
     setIsLoading(false)
   }
 
@@ -57,19 +59,18 @@ const AuthPage = () => {
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-12 lg:flex-row lg:items-center">
       <section className="flex-1 space-y-6">
         <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600">
-          Starter template
+          {t('authPage.hero.badge')}
         </div>
         <h1 className="text-balance font-display text-4xl text-slate-900 sm:text-5xl">
-          Build fast with secure auth and protected routes.
+          {t('authPage.hero.title')}
         </h1>
         <p className="max-w-xl text-base text-slate-600">
-          This starter includes Supabase authentication, TanStack Router guards, and
-          a full CRUD Todo example wired to the API.
+          {t('authPage.hero.description')}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="badge">Supabase Auth</span>
-          <span className="badge">TanStack Router</span>
-          <span className="badge">Tailwind CSS</span>
+          <span className="badge">{t('authPage.hero.tags.auth')}</span>
+          <span className="badge">{t('authPage.hero.tags.router')}</span>
+          <span className="badge">{t('authPage.hero.tags.styles')}</span>
         </div>
       </section>
 
@@ -77,9 +78,11 @@ const AuthPage = () => {
         <div className="card motion-safe:animate-fade-up">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-500">Access</p>
+              <p className="text-sm font-semibold text-slate-500">{t('authPage.panel.access')}</p>
               <h2 className="mt-1 font-display text-2xl text-slate-900">
-                {mode === 'login' ? 'Welcome back' : 'Create an account'}
+                {mode === 'login'
+                  ? t('authPage.panel.welcomeBack')
+                  : t('authPage.panel.createAccount')}
               </h2>
             </div>
             <div className="rounded-full border border-slate-200 bg-slate-50 p-1">
@@ -93,7 +96,7 @@ const AuthPage = () => {
                 onClick={() => setMode('login')}
                 disabled={isLoading}
               >
-                Login
+                {t('authPage.panel.modeLogin')}
               </button>
               <button
                 className={`px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -105,14 +108,14 @@ const AuthPage = () => {
                 onClick={() => setMode('signup')}
                 disabled={isLoading}
               >
-                Sign up
+                {t('authPage.panel.modeSignup')}
               </button>
             </div>
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <label className="block text-sm font-semibold text-slate-700" htmlFor="email">
-              Email address
+              {t('authPage.panel.email')}
             </label>
             <input
               className="input"
@@ -126,7 +129,7 @@ const AuthPage = () => {
             />
 
             <label className="block text-sm font-semibold text-slate-700" htmlFor="password">
-              Password
+              {t('authPage.panel.password')}
             </label>
             <input
               className="input"
@@ -153,15 +156,15 @@ const AuthPage = () => {
 
             <button className="btn-primary w-full" type="submit" disabled={isLoading}>
               {isLoading
-                ? 'Please wait...'
+                ? t('authPage.panel.loading')
                 : mode === 'login'
-                  ? 'Sign in'
-                  : 'Create account'}
+                  ? t('authPage.panel.submitLogin')
+                  : t('authPage.panel.submitSignup')}
             </button>
           </form>
 
           <p className="mt-5 text-xs text-slate-500">
-            By continuing you agree to the starter template policies.
+            {t('authPage.panel.policy')}
           </p>
         </div>
       </section>

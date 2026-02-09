@@ -1,8 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { createTodo, deleteTodo, getTodos, updateTodo, type Todo } from '../lib/api'
 
 const TodosPage = () => {
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const [newTitle, setNewTitle] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -21,7 +23,9 @@ const TodosPage = () => {
       setNewTitle('')
     },
     onError: (err) => {
-      setActionError(err instanceof Error ? err.message : 'Failed to create todo')
+      setActionError(
+        err instanceof Error ? err.message : t('todosPage.errors.createFailed'),
+      )
     },
   })
 
@@ -34,7 +38,9 @@ const TodosPage = () => {
       setEditingTitle('')
     },
     onError: (err) => {
-      setActionError(err instanceof Error ? err.message : 'Failed to update todo')
+      setActionError(
+        err instanceof Error ? err.message : t('todosPage.errors.updateFailed'),
+      )
     },
   })
 
@@ -44,7 +50,9 @@ const TodosPage = () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] })
     },
     onError: (err) => {
-      setActionError(err instanceof Error ? err.message : 'Failed to delete todo')
+      setActionError(
+        err instanceof Error ? err.message : t('todosPage.errors.deleteFailed'),
+      )
     },
   })
 
@@ -52,6 +60,14 @@ const TodosPage = () => {
     createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
 
   const todos = useMemo(() => data ?? [], [data])
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(i18n.language, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }),
+    [i18n.language],
+  )
 
   const startEditing = (todo: Todo) => {
     setEditingId(todo.id)
@@ -88,16 +104,18 @@ const TodosPage = () => {
       <section className="card motion-safe:animate-fade-up">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-500">Protected demo</p>
-            <h2 className="mt-1 font-display text-2xl text-slate-900">Todo CRUD</h2>
+            <p className="text-sm font-semibold text-slate-500">{t('todosPage.section.badge')}</p>
+            <h2 className="mt-1 font-display text-2xl text-slate-900">
+              {t('todosPage.section.title')}
+            </h2>
           </div>
-          <span className="badge">API: /api/todos</span>
+          <span className="badge">{t('todosPage.section.apiBadge')}</span>
         </div>
 
         <form className="mt-6 flex flex-col gap-3 sm:flex-row" onSubmit={submitNewTodo}>
           <input
             className="input flex-1"
-            placeholder="Add a new task"
+            placeholder={t('todosPage.form.placeholder')}
             value={newTitle}
             onChange={(event) => setNewTitle(event.target.value)}
             minLength={1}
@@ -106,7 +124,7 @@ const TodosPage = () => {
             disabled={isWorking}
           />
           <button className="btn-primary" type="submit" disabled={isWorking}>
-            Add todo
+            {t('todosPage.form.submit')}
           </button>
         </form>
 
@@ -119,20 +137,24 @@ const TodosPage = () => {
 
       <section className="card-muted">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-slate-600">Your tasks</p>
-          <p className="text-xs text-slate-500">{todos.length} items</p>
+          <p className="text-sm font-semibold text-slate-600">{t('todosPage.list.title')}</p>
+          <p className="text-xs text-slate-500">
+            {t('todosPage.list.itemsCount', { count: todos.length })}
+          </p>
         </div>
 
-        {isLoading && <p className="mt-4 text-sm text-slate-500">Loading todos...</p>}
+        {isLoading && (
+          <p className="mt-4 text-sm text-slate-500">{t('todosPage.list.loading')}</p>
+        )}
         {isError && (
           <p className="mt-4 text-sm text-rose-600">
-            {error instanceof Error ? error.message : 'Failed to load todos'}
+            {error instanceof Error ? error.message : t('todosPage.errors.loadFailed')}
           </p>
         )}
 
         {!isLoading && !isError && todos.length === 0 && (
           <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white/80 p-6 text-sm text-slate-500">
-            No todos yet. Create your first task above.
+            {t('todosPage.list.empty')}
           </div>
         )}
 
@@ -154,10 +176,14 @@ const TodosPage = () => {
                       }`}
                       type="button"
                       onClick={() => toggleDone(todo)}
-                      aria-label={todo.isDone ? 'Mark as not done' : 'Mark as done'}
+                      aria-label={
+                        todo.isDone
+                          ? t('todosPage.list.markUndone')
+                          : t('todosPage.list.markDone')
+                      }
                       disabled={isWorking}
                     >
-                      {todo.isDone ? 'Done' : 'Todo'}
+                      {todo.isDone ? t('todosPage.list.done') : t('todosPage.list.todo')}
                     </button>
                     <div>
                       <p
@@ -168,7 +194,9 @@ const TodosPage = () => {
                         {todo.title}
                       </p>
                       <p className="text-xs text-slate-500">
-                        Created {new Date(todo.createdAt).toLocaleString()}
+                        {t('todosPage.list.createdAt', {
+                          value: dateFormatter.format(new Date(todo.createdAt)),
+                        })}
                       </p>
                     </div>
                   </div>
@@ -179,7 +207,7 @@ const TodosPage = () => {
                       onClick={() => startEditing(todo)}
                       disabled={isWorking}
                     >
-                      Edit
+                      {t('todosPage.list.edit')}
                     </button>
                     <button
                       className="btn-ghost"
@@ -187,7 +215,7 @@ const TodosPage = () => {
                       onClick={() => deleteMutation.mutate(todo.id)}
                       disabled={isWorking}
                     >
-                      Delete
+                      {t('todosPage.list.delete')}
                     </button>
                   </div>
                 </div>
@@ -208,7 +236,7 @@ const TodosPage = () => {
                         onClick={() => submitEdit(todo)}
                         disabled={isWorking}
                       >
-                        Save
+                        {t('todosPage.list.save')}
                       </button>
                       <button
                         className="btn-outline"
@@ -216,7 +244,7 @@ const TodosPage = () => {
                         onClick={() => setEditingId(null)}
                         disabled={isWorking}
                       >
-                        Cancel
+                        {t('todosPage.list.cancel')}
                       </button>
                     </div>
                   </div>
