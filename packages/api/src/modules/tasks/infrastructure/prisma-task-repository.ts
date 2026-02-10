@@ -1,11 +1,11 @@
 import type { Prisma, PrismaClient } from '@prisma/client'
-import type { TaskRepository } from '../application/ports/task-repository'
+import type { TaskRepository } from '@api/modules/tasks/application/ports/task-repository'
 import {
   TaskSortByEnum,
   TaskStatusFilterEnum,
   type TaskEntity,
   type TaskListPage,
-} from '../domain/task'
+} from '@api/modules/tasks/domain/task'
 
 const toTaskEntity = (task: {
   id: string

@@ -1,14 +1,14 @@
-import { createTaskUseCases, type TaskUseCases } from '../modules/tasks/application/use-cases'
-import type { AuthProvider } from '../modules/auth/application/ports/auth-provider'
-import { SupabaseAuthProvider } from '../modules/auth/infrastructure/supabase-auth-provider'
-import { PrismaTaskRepository } from '../modules/tasks/infrastructure/prisma-task-repository'
+import { createTaskUseCases, type TaskUseCases } from '@api/modules/tasks/application/use-cases'
+import type { AuthProvider } from '@api/modules/auth/application/ports/auth-provider'
+import { SupabaseAuthProvider } from '@api/modules/auth/infrastructure/supabase-auth-provider'
+import { PrismaTaskRepository } from '@api/modules/tasks/infrastructure/prisma-task-repository'
 import {
   disconnectPrismaClient,
   getPrismaClient,
   type PrismaClientInstance,
-} from '../core/persistence/prisma-client'
-import { createLogger, type Logger } from '../core/logging/logger'
-import { loadRuntimeConfig, type RuntimeConfig } from '../core/config/runtime-config'
+} from '@api/core/persistence/prisma-client'
+import { createLogger, type Logger } from '@api/core/logging/logger'
+import { loadRuntimeConfig, type RuntimeConfig } from '@api/core/config/runtime-config'
 
 export type AppContainer = {
   runtimeConfig: RuntimeConfig

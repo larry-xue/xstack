@@ -1,6 +1,6 @@
 import { t } from 'elysia'
-import { errorEnvelopeSchema, makeSuccessEnvelopeSchema } from '../../../../core/http/envelope'
-import { TaskSortByEnum, TaskSortOrderEnum, TaskStatusFilterEnum } from '../../domain/task'
+import { errorEnvelopeSchema, makeSuccessEnvelopeSchema } from '@api/core/http/envelope'
+import { TaskSortByEnum, TaskSortOrderEnum, TaskStatusFilterEnum } from '@api/modules/tasks/domain/task'
 
 export const taskSchema = t.Object({
   id: t.String(),

@@ -1,4 +1,4 @@
-import type { TaskEntity, TaskListPage, TaskListQuery, TaskPatch } from '../../domain/task'
+import type { TaskEntity, TaskListPage, TaskListQuery, TaskPatch } from '@api/modules/tasks/domain/task'
 
 export interface TaskRepository {
   listByUser(input: { userId: string; query: TaskListQuery }): Promise<TaskListPage>

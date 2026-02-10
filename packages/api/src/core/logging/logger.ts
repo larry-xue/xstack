@@ -1,4 +1,4 @@
-import type { NodeEnv } from '../config/runtime-config'
+import type { NodeEnv } from '@api/core/config/runtime-config'
 
 type LogLevel = 'info' | 'warn' | 'error'
 

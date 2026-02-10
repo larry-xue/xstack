@@ -1,6 +1,6 @@
 import { SignJWT } from 'jose'
-import { loadRuntimeConfig } from '../src/core/config/runtime-config'
-import { getPrismaClient } from '../src/core/persistence/prisma-client'
+import { loadRuntimeConfig } from '@api/core/config/runtime-config'
+import { getPrismaClient } from '@api/core/persistence/prisma-client'
 
 const runtimeConfig = loadRuntimeConfig()
 const prisma = getPrismaClient({

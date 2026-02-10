@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia'
-import { makeSuccessEnvelopeSchema, toSuccessEnvelope } from '../../../../core/http/envelope'
+import { makeSuccessEnvelopeSchema, toSuccessEnvelope } from '@api/core/http/envelope'
 
 type RequestContextSingleton = {
   decorator: {}

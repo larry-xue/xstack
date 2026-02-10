@@ -1,11 +1,11 @@
 import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
-import { createAppContainer, type AppContainer } from './bootstrap/create-container'
-import { createAuthGuardPlugin } from './core/plugins/auth-guard'
-import { createErrorPlugin } from './core/plugins/error-handler'
-import { createRequestContextPlugin } from './core/plugins/request-context'
-import { createSystemRoutes } from './modules/system/presentation/http/routes'
-import { createTaskRoutes } from './modules/tasks/presentation/http/routes'
+import { createAppContainer, type AppContainer } from '@api/bootstrap/create-container'
+import { createAuthGuardPlugin } from '@api/core/plugins/auth-guard'
+import { createErrorPlugin } from '@api/core/plugins/error-handler'
+import { createRequestContextPlugin } from '@api/core/plugins/request-context'
+import { createSystemRoutes } from '@api/modules/system/presentation/http/routes'
+import { createTaskRoutes } from '@api/modules/tasks/presentation/http/routes'
 
 type ElysiaOptions = NonNullable<ConstructorParameters<typeof Elysia>[0]>
 

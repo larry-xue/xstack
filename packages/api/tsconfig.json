@@ -4,6 +4,11 @@
     "target": "ES2023",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@api": ["./src/index.ts"],
+      "@api/*": ["./src/*"]
+    },
     "noEmit": true
   },
   "include": ["src/**/*.ts"]

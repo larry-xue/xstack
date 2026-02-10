@@ -6,8 +6,8 @@ import {
   isDatabaseError,
   isDatabaseUnavailableError,
   mapFrameworkError,
-} from '../http/errors'
-import type { Logger } from '../logging/logger'
+} from '@api/core/http/errors'
+import type { Logger } from '@api/core/logging/logger'
 
 type ErrorPluginSingleton = {
   decorator: {}

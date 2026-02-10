@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from 'jose'
-import type { AuthPrincipal, AuthProvider } from '../application/ports/auth-provider'
+import type { AuthPrincipal, AuthProvider } from '@api/modules/auth/application/ports/auth-provider'
 
 type SupabaseAuthProviderOptions = {
   jwtSecret: string

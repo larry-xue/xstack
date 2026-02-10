@@ -1,6 +1,6 @@
 import { Elysia, type HTTPHeaders } from 'elysia'
-import type { Logger } from '../logging/logger'
-import type { RequestContext } from '../http/request-context'
+import type { Logger } from '@api/core/logging/logger'
+import type { RequestContext } from '@api/core/http/request-context'
 
 const resolveRequestId = (request: Request) => {
   const headerRequestId = request.headers.get('x-request-id')

@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
-import type { NodeEnv } from '../config/runtime-config'
+import type { NodeEnv } from '@api/core/config/runtime-config'
 
 type GetPrismaClientOptions = {
   databaseUrl: string

@@ -1,6 +1,6 @@
 import { t } from 'elysia'
 import type { TSchema } from 'elysia'
-import { ErrorCodeEnum } from './errors'
+import { ErrorCodeEnum } from '@api/core/http/errors'
 
 export type SuccessEnvelope<T> = {
   data: T

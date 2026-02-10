@@ -1,7 +1,7 @@
 import { node } from '@elysiajs/node'
-import { createAppContainer } from './bootstrap/create-container'
-import { loadRuntimeConfig } from './core/config/runtime-config'
-import { createApp } from './app'
+import { createAppContainer } from '@api/bootstrap/create-container'
+import { loadRuntimeConfig } from '@api/core/config/runtime-config'
+import { createApp } from '@api/app'
 
 const runtimeConfig = loadRuntimeConfig()
 const container = createAppContainer({ runtimeConfig })

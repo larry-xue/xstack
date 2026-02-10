@@ -1,8 +1,8 @@
 import { Elysia } from 'elysia'
-import type { AuthPrincipal } from '../../../auth/application/ports/auth-provider'
-import { toSuccessEnvelope } from '../../../../core/http/envelope'
-import type { TaskUseCases } from '../../application/use-cases'
-import { withTaskListDefaults } from '../../domain/task'
+import type { AuthPrincipal } from '@api/modules/auth/application/ports/auth-provider'
+import { toSuccessEnvelope } from '@api/core/http/envelope'
+import type { TaskUseCases } from '@api/modules/tasks/application/use-cases'
+import { withTaskListDefaults } from '@api/modules/tasks/domain/task'
 import {
   actionSuccessSchema,
   commonErrorSchema,
@@ -12,7 +12,7 @@ import {
   taskParamsSchema,
   taskSuccessSchema,
   updateTaskBodySchema,
-} from './schemas'
+} from '@api/modules/tasks/presentation/http/schemas'
 
 type AuthenticatedRequestSingleton = {
   decorator: {}
