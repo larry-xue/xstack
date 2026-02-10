@@ -1,3 +1,4 @@
+import { logger as elysiaLogger } from '@bogeychan/elysia-logger'
 import { openapi } from '@elysiajs/openapi'
 import { Elysia } from 'elysia'
 import { createAppContainer, type AppContainer } from '@api/bootstrap/create-container'
@@ -11,6 +12,22 @@ type ElysiaOptions = NonNullable<ConstructorParameters<typeof Elysia>[0]>
 
 type CreateAppOptions = Pick<ElysiaOptions, 'adapter'> & {
   container?: AppContainer
+}
+
+const resolveHttpLogLevel = (nodeEnv: AppContainer['runtimeConfig']['nodeEnv']) => {
+  if (nodeEnv === 'test') {
+    return 'warn'
+  }
+
+  return 'info'
+}
+
+const isHealthRoute = (request: Request) => {
+  try {
+    return new URL(request.url).pathname === '/health'
+  } catch {
+    return request.url === '/health'
+  }
 }
 
 export const createApp = (options?: CreateAppOptions) => {
@@ -36,8 +53,20 @@ export const createApp = (options?: CreateAppOptions) => {
         },
       }),
     )
-    .use(createRequestContextPlugin(container.logger))
-    .use(createErrorPlugin(container.logger))
+    .use(createRequestContextPlugin())
+    .use(
+      elysiaLogger({
+        level: resolveHttpLogLevel(container.runtimeConfig.nodeEnv),
+        autoLogging: {
+          ignore: ({ request }) => isHealthRoute(request),
+        },
+        customProps: ctx => ({
+          requestId:
+            'requestId' in ctx && typeof ctx.requestId === 'string' ? ctx.requestId : undefined,
+        }),
+      }),
+    )
+    .use(createErrorPlugin())
     .onStop(async () => {
       await container.dispose()
     })

@@ -1,5 +1,4 @@
 import { Elysia, type HTTPHeaders } from 'elysia'
-import type { Logger } from '@api/core/logging/logger'
 import type { RequestContext } from '@api/core/http/request-context'
 
 const resolveRequestId = (request: Request) => {
@@ -19,13 +18,12 @@ const applyRequestIdHeader = (set: { headers?: HTTPHeaders }, requestId: string)
   set.headers['x-request-id'] = requestId
 }
 
-export const createRequestContextPlugin = (logger: Logger) =>
+export const createRequestContextPlugin = () =>
   new Elysia()
     .derive({ as: 'global' }, ({ request }): RequestContext => {
       const requestId = resolveRequestId(request)
       return {
         requestId,
-        requestStart: Date.now(),
       }
     })
     .onBeforeHandle({ as: 'global' }, ({ requestId, set }) => {
@@ -42,16 +40,4 @@ export const createRequestContextPlugin = (logger: Logger) =>
       const safeRequestId =
         requestId && requestId.length > 0 ? requestId : resolveRequestId(request)
       applyRequestIdHeader(set, safeRequestId)
-    })
-    .onAfterResponse({ as: 'global' }, ({ request, requestId, requestStart, set }) => {
-      const status = set.status ?? 200
-      const statusCode = typeof status === 'number' ? status : Number(status)
-
-      logger.info('http_request_completed', {
-        requestId,
-        method: request.method,
-        path: new URL(request.url).pathname,
-        status: statusCode,
-        durationMs: Date.now() - requestStart,
-      })
     })

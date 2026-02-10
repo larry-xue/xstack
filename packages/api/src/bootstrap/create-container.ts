@@ -7,12 +7,10 @@ import {
   getPrismaClient,
   type PrismaClientInstance,
 } from '@api/core/persistence/prisma-client'
-import { createLogger, type Logger } from '@api/core/logging/logger'
 import { loadRuntimeConfig, type RuntimeConfig } from '@api/core/config/runtime-config'
 
 export type AppContainer = {
   runtimeConfig: RuntimeConfig
-  logger: Logger
   authProvider: AuthProvider
   taskUseCases: TaskUseCases
   dispose: () => Promise<void>
@@ -24,10 +22,6 @@ type CreateAppContainerOptions = {
 
 export const createAppContainer = (options?: CreateAppContainerOptions): AppContainer => {
   const runtimeConfig = options?.runtimeConfig ?? loadRuntimeConfig()
-  const logger = createLogger({
-    service: 'api',
-    nodeEnv: runtimeConfig.nodeEnv,
-  })
   const prisma = getPrismaClient({
     databaseUrl: runtimeConfig.databaseUrl,
     nodeEnv: runtimeConfig.nodeEnv,
@@ -42,7 +36,6 @@ export const createAppContainer = (options?: CreateAppContainerOptions): AppCont
 
   return {
     runtimeConfig,
-    logger,
     authProvider,
     taskUseCases,
     dispose: async () => {
