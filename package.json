@@ -13,7 +13,6 @@
     "test:e2e:ui": "playwright test --ui",
     "dev": "turbo dev",
     "build": "turbo build",
-    "generate:api-client": "pnpm -C packages/api export:openapi && pnpm -C packages/api-client generate",
     "lint": "oxlint --config .oxlintrc.json --react-plugin --node-plugin .",
     "lint:fix": "oxlint --config .oxlintrc.json --react-plugin --node-plugin --fix .",
     "fmt": "oxfmt --config .oxfmtrc.jsonc --write .",

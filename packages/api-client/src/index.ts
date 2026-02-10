@@ -1,131 +1,83 @@
-import type { operations, paths } from './generated/schema'
+import { treaty, type Treaty } from '@elysiajs/eden'
+import type { App } from '@repo/api'
 
-export type OpenApiPaths = paths
-
-type ListTodosResponse =
-  operations['getApiV1Todos']['responses'][200]['content']['application/json']
-type CreateTodoResponse =
-  operations['postApiV1Todos']['responses'][200]['content']['application/json']
-type UpdateTodoResponse =
-  operations['patchApiV1TodosById']['responses'][200]['content']['application/json']
-type DeleteTodoResponse =
-  operations['deleteApiV1TodosById']['responses'][200]['content']['application/json']
-
-type CreateTodoBody = operations['postApiV1Todos']['requestBody']['content']['application/json']
-export type UpdateTodoPatch =
-  operations['patchApiV1TodosById']['requestBody']['content']['application/json']
-export type ListTodosQuery = NonNullable<operations['getApiV1Todos']['parameters']['query']>
-type ErrorEnvelope = operations['getApiV1Todos']['responses'][401]['content']['application/json']
-
-export type TaskList = ListTodosResponse['data']
-export type Task = TaskList['items'][number]
-
-type RequestOptions = {
+export type RequestOptions = {
   baseUrl?: string
   getAccessToken?: () => Promise<string | null>
   fetcher?: typeof fetch
 }
 
-const toErrorMessage = (payload: unknown, fallback: string) => {
-  if (!payload || typeof payload !== 'object') {
-    return fallback
+type ErrorWithValue = {
+  value?: unknown
+}
+
+type ErrorEnvelope = {
+  error?: {
+    message?: string
+  }
+}
+
+const toErrorMessage = (error: unknown, fallback: string) => {
+  if (error && typeof error === 'object' && 'value' in error) {
+    const payload = (error as ErrorWithValue).value
+
+    if (typeof payload === 'string' && payload.length > 0) {
+      return payload
+    }
+
+    if (payload && typeof payload === 'object') {
+      const message = (payload as ErrorEnvelope).error?.message
+      if (typeof message === 'string' && message.length > 0) {
+        return message
+      }
+    }
   }
 
-  const envelope = payload as Partial<ErrorEnvelope>
-
-  const message = envelope.error?.message
-  if (typeof message === 'string' && message.length > 0) {
-    return message
+  if (error instanceof Error && error.message.length > 0) {
+    return error.message
   }
 
   return fallback
 }
 
-const createRequest = (options: RequestOptions) => {
-  const baseUrl = options.baseUrl ?? ''
-  const fetcher = options.fetcher ?? fetch
+type ResponseMap = Record<number, unknown>
+type EnvelopeDataFromResponses<TResponses extends ResponseMap> = Extract<
+  TResponses[keyof TResponses],
+  { data: unknown }
+> extends { data: infer TData }
+  ? TData
+  : never
 
-  return async <TResponse>(path: string, init: RequestInit = {}) => {
-    const headers = new Headers(init.headers)
-    const accessToken = options.getAccessToken ? await options.getAccessToken() : null
-
-    if (accessToken) {
-      headers.set('authorization', `Bearer ${accessToken}`)
-    }
-
-    if (init.body && !headers.has('content-type')) {
-      headers.set('content-type', 'application/json')
-    }
-
-    const response = await fetcher(`${baseUrl}${path}`, {
-      ...init,
-      headers,
-    })
-    const text = await response.text()
-    const hasJson = (response.headers.get('content-type') ?? '').includes('application/json')
-    const parsed = hasJson && text.length > 0 ? JSON.parse(text) : null
-
-    if (!response.ok) {
-      throw new Error(toErrorMessage(parsed, response.statusText))
-    }
-
-    if (!parsed) {
-      throw new Error('Expected JSON response body')
-    }
-
-    return parsed as TResponse
-  }
-}
-
-const isQueryPrimitive = (value: unknown): value is string | number | boolean =>
-  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
-
-const withQuery = (path: string, query?: Record<string, unknown>) => {
-  if (!query) {
-    return path
+export const unwrapApiEnvelope = <TResponses extends ResponseMap>(
+  result: Treaty.TreatyResponse<TResponses>,
+  fallbackMessage: string,
+) => {
+  if (result.error) {
+    throw new Error(toErrorMessage(result.error, fallbackMessage))
   }
 
-  const params = new URLSearchParams()
-
-  for (const [key, value] of Object.entries(query)) {
-    if (isQueryPrimitive(value)) {
-      params.set(key, String(value))
-    }
+  if (!result.data || typeof result.data !== 'object' || !('data' in result.data)) {
+    throw new Error('Expected JSON response body')
   }
 
-  const qs = params.toString()
-  return qs.length > 0 ? `${path}?${qs}` : path
+  return result.data.data as EnvelopeDataFromResponses<TResponses>
 }
 
 export const createApiClient = (options: RequestOptions = {}) => {
-  const request = createRequest(options)
+  const baseUrl = options.baseUrl ? options.baseUrl.replace(/\/+$/, '') : ''
 
-  return {
-    getTodos: async (query?: ListTodosQuery) => {
-      const path = withQuery('/api/v1/todos', query as Record<string, unknown> | undefined)
-      const response = await request<ListTodosResponse>(path)
-      return response.data
+  return treaty<App>(baseUrl, {
+    keepDomain: true,
+    fetcher: options.fetcher ?? fetch,
+    headers: async () => {
+      const accessToken = options.getAccessToken ? await options.getAccessToken() : null
+      if (!accessToken) {
+        return undefined
+      }
+
+      return {
+        authorization: `Bearer ${accessToken}`,
+      }
     },
-    createTodo: async (title: string) => {
-      const payload: CreateTodoBody = { title }
-      const response = await request<CreateTodoResponse>('/api/v1/todos', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      })
-      return response.data
-    },
-    updateTodo: async (id: string, patch: UpdateTodoPatch) => {
-      const response = await request<UpdateTodoResponse>(`/api/v1/todos/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(patch),
-      })
-      return response.data
-    },
-    deleteTodo: async (id: string) => {
-      const response = await request<DeleteTodoResponse>(`/api/v1/todos/${id}`, {
-        method: 'DELETE',
-      })
-      return response.data
-    },
-  }
+  })
 }

@@ -13,7 +13,7 @@ export const responseMetaSchema = t.Object({
   requestId: t.String(),
 })
 
-export const makeSuccessEnvelopeSchema = (dataSchema: TSchema) =>
+export const makeSuccessEnvelopeSchema = <TDataSchema extends TSchema>(dataSchema: TDataSchema) =>
   t.Object({
     data: dataSchema,
     meta: responseMetaSchema,

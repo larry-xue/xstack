@@ -6,7 +6,6 @@
 - `pnpm -C packages/api build` - bundle server to `dist/` (ESM)
 - `pnpm -C packages/api start` - build and run production server
 - `pnpm -C packages/api test` - run unit/integration/contract tests
-- `pnpm -C packages/api export:openapi` - export runtime OpenAPI schema to `packages/api-client/openapi/openapi.json`
 - `pnpm -C packages/api prisma migrate deploy` - apply Prisma migrations
 
 ## API Surface
@@ -17,7 +16,7 @@
 - `POST /api/v1/todos` requires `Authorization: Bearer <token>`
 - `PATCH /api/v1/todos/:id` requires `Authorization: Bearer <token>`
 - `DELETE /api/v1/todos/:id` requires `Authorization: Bearer <token>`
-- `GET /openapi/json` OpenAPI contract (single source of truth)
+- `GET /openapi/json` OpenAPI schema (runtime docs/debug endpoint)
 
 ## Response Contract
 
