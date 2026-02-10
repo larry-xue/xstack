@@ -1,7 +1,12 @@
 import { Paper, Stack, Text, Title } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-const HomePage = () => {
+export const Route = createFileRoute('/app/home')({
+  component: HomePage,
+})
+
+function HomePage() {
   const { t } = useTranslation()
 
   return (
@@ -15,5 +20,3 @@ const HomePage = () => {
     </Paper>
   )
 }
-
-export default HomePage

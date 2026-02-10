@@ -1,15 +1,26 @@
 import { useEffect, useMemo } from 'react'
-import { Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect, useNavigate, useRouterState } from '@tanstack/react-router'
 import { spotlight } from '@mantine/spotlight'
 import { FolderKanban, Home, Inbox, Search, Settings, SquareCheckBig } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { CommandPalette } from '@/components/workspace/command-palette'
 import { WorkspaceShell } from '@/components/workspace/workspace-shell'
 import type { WorkspaceNavItem } from '@/components/workspace/workspace-sidebar'
+import { getSession } from '@/lib/auth'
 import { handleUiError } from '@/lib/error-pipeline'
 import { useAuth } from '@/providers/auth'
 
-const AuthenticatedLayout = () => {
+export const Route = createFileRoute('/app')({
+  beforeLoad: async () => {
+    const session = await getSession()
+    if (!session) {
+      throw redirect({ to: '/auth' })
+    }
+  },
+  component: AuthenticatedLayout,
+})
+
+function AuthenticatedLayout() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const pathname = useRouterState({
@@ -110,5 +121,3 @@ const AuthenticatedLayout = () => {
     </>
   )
 }
-
-export default AuthenticatedLayout

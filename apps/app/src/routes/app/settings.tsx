@@ -8,9 +8,14 @@ import {
   Title,
   useMantineColorScheme,
 } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-const SettingsPage = () => {
+export const Route = createFileRoute('/app/settings')({
+  component: SettingsPage,
+})
+
+function SettingsPage() {
   const { t, i18n } = useTranslation()
   const { colorScheme, setColorScheme } = useMantineColorScheme()
   const currentLanguage = i18n.resolvedLanguage?.startsWith('zh') ? 'zh-CN' : 'en'
@@ -62,5 +67,3 @@ const SettingsPage = () => {
     </Paper>
   )
 }
-
-export default SettingsPage

@@ -12,6 +12,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Check, ChevronLeft, ChevronRight, PencilLine, Plus, Trash2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -22,9 +23,13 @@ type TaskSortBy = 'createdAt' | 'updatedAt' | 'title'
 type TaskSortOrder = 'asc' | 'desc'
 type TaskStatus = 'all' | 'todo' | 'done'
 
+export const Route = createFileRoute('/app/tasks')({
+  component: TasksPage,
+})
+
 const statusBadgeColor = (done: boolean) => (done ? 'teal' : 'gray')
 
-const TasksPage = () => {
+function TasksPage() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const newTaskInputRef = useRef<HTMLInputElement>(null)
@@ -433,5 +438,3 @@ const TasksPage = () => {
     </Stack>
   )
 }
-
-export default TasksPage

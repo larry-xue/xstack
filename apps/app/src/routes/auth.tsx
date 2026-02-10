@@ -12,13 +12,24 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { handleUiError } from '@/lib/error-pipeline'
+import { getSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
-const AuthPage = () => {
+export const Route = createFileRoute('/auth')({
+  beforeLoad: async () => {
+    const session = await getSession()
+    if (session) {
+      throw redirect({ to: '/app/home' })
+    }
+  },
+  component: AuthPage,
+})
+
+function AuthPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -147,5 +158,3 @@ const AuthPage = () => {
     </Center>
   )
 }
-
-export default AuthPage
