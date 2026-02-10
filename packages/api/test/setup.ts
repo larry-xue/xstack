@@ -1,4 +1,4 @@
-import { loadEnvFiles } from "@api/core/config/runtime-config"
+import { loadEnvFiles } from '@api/core/config/runtime-config'
 
 loadEnvFiles(process.cwd())
 

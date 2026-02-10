@@ -1,9 +1,6 @@
 import { Elysia } from 'elysia'
 import { AppError, ErrorCodeEnum } from '@api/core/http/errors'
-import type {
-  AuthPrincipal,
-  AuthProvider,
-} from '@api/modules/auth/application/ports/auth-provider'
+import type { AuthPrincipal, AuthProvider } from '@api/modules/auth/application/ports/auth-provider'
 
 const extractBearerToken = (request: Request): string | null => {
   const authorization = request.headers.get('authorization')

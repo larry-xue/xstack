@@ -1,5 +1,11 @@
 import { useEffect, useMemo } from 'react'
-import { Outlet, createFileRoute, redirect, useNavigate, useRouterState } from '@tanstack/react-router'
+import {
+  Outlet,
+  createFileRoute,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from '@tanstack/react-router'
 import { spotlight } from '@mantine/spotlight'
 import { FolderKanban, Home, Inbox, Search, Settings, SquareCheckBig } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
