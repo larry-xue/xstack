@@ -15,6 +15,7 @@ import {
 import { useNavigate } from '@tanstack/react-router'
 import { AlertCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { handleUiError } from '@/lib/error-pipeline'
 import { supabase } from '@/lib/supabase'
 
 const AuthPage = () => {
@@ -23,13 +24,11 @@ const AuthPage = () => {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError(null)
     setNotice(null)
     setIsLoading(true)
 
@@ -37,7 +36,9 @@ const AuthPage = () => {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
       if (signInError) {
-        setError(signInError.message)
+        handleUiError(signInError, {
+          fallbackI18nKey: 'errors.authFailed',
+        })
         setIsLoading(false)
         return
       }
@@ -48,7 +49,9 @@ const AuthPage = () => {
 
     const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
     if (signUpError) {
-      setError(signUpError.message)
+      handleUiError(signUpError, {
+        fallbackI18nKey: 'errors.authFailed',
+      })
       setIsLoading(false)
       return
     }
@@ -121,11 +124,6 @@ const AuthPage = () => {
                 disabled={isLoading}
               />
 
-              {error && (
-                <Alert color="red" title={t('auth.errorTitle')} icon={<AlertCircle size={16} />}>
-                  {error}
-                </Alert>
-              )}
               {notice && (
                 <Alert color="blue" title={t('auth.noticeTitle')} icon={<AlertCircle size={16} />}>
                   {notice}

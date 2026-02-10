@@ -5,6 +5,17 @@ type Credentials = {
   password: string
 }
 
+const resetAuthState = async (page: Page) => {
+  await page.context().clearCookies()
+  await page.goto('/auth')
+  await page.evaluate(() => {
+    window.localStorage.clear()
+    window.localStorage.setItem('lang', 'en')
+    window.sessionStorage.clear()
+  })
+  await page.reload()
+}
+
 const createCredentials = (): Credentials => {
   const nonce = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   return {
@@ -14,7 +25,7 @@ const createCredentials = (): Credentials => {
 }
 
 const signUp = async (page: Page, credentials: Credentials) => {
-  await page.goto('/auth')
+  await resetAuthState(page)
   await page.getByText('Sign up').click()
   await page.getByLabel('Email').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
@@ -23,7 +34,7 @@ const signUp = async (page: Page, credentials: Credentials) => {
 }
 
 const login = async (page: Page, credentials: Credentials) => {
-  await page.goto('/auth')
+  await resetAuthState(page)
   await page.getByLabel('Email').fill(credentials.email)
   await page.getByLabel('Password').fill(credentials.password)
   await page.getByRole('button', { name: 'Sign in' }).click()
@@ -109,8 +120,10 @@ test.describe('auth and tasks', () => {
     const credentials = createCredentials()
     await signUp(page, credentials)
 
-    await page.keyboard.press('Control+K')
-    await page.keyboard.type('Projects')
+    await page.getByRole('button', { name: 'Open command palette' }).click()
+    const commandSearch = page.getByPlaceholder('Search pages and actions')
+    await expect(commandSearch).toBeVisible()
+    await commandSearch.fill('Projects')
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/\/app\/projects$/)
   })
@@ -125,5 +138,77 @@ test.describe('auth and tasks', () => {
     await expect(openNavButton).toBeVisible()
     await openNavButton.click()
     await expect(page.getByRole('button', { name: 'Tasks' })).toBeVisible()
+  })
+
+  test('shows global toast for task load failures and no inline task alert', async ({ page }) => {
+    const credentials = createCredentials()
+    await signUp(page, credentials)
+
+    await page.route('**/api/v1/todos**', route =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: {
+            code: 'UNMAPPED_CODE',
+            message: '',
+            requestId: 'e2e-load-error',
+          },
+        }),
+      }),
+    )
+
+    await page.getByRole('button', { name: 'Tasks' }).click()
+    await expect(page).toHaveURL(/\/app\/tasks$/)
+    await expect(page.getByText('Failed to load tasks')).toBeVisible()
+    await expect(page.locator('[data-testid="tasks-page"] .mantine-Alert-root')).toHaveCount(0)
+  })
+
+  test('redirects to auth and shows session-expired toast on 401', async ({ page }) => {
+    const credentials = createCredentials()
+    await signUp(page, credentials)
+
+    await page.route('**/api/v1/todos**', route =>
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: {
+            code: 'AUTH_INVALID_TOKEN',
+            message: 'Invalid bearer token',
+            requestId: 'e2e-unauthorized',
+          },
+        }),
+      }),
+    )
+
+    await page.getByRole('button', { name: 'Tasks' }).click()
+    await expect(page).toHaveURL(/\/auth$/)
+    await expect(page.getByText('Your session has expired. Please sign in again.')).toBeVisible()
+  })
+
+  test('shows auth failure via toast only', async ({ page }) => {
+    await resetAuthState(page)
+
+    await page.route('**/auth/v1/token*', route =>
+      route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: 'invalid_grant',
+          error_description: 'Invalid login credentials',
+        }),
+      }),
+    )
+
+    await page.getByLabel('Email').fill('invalid@example.com')
+    await page.getByLabel('Password').fill('WrongPassword123!')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+
+    await expect(page).toHaveURL(/\/auth$/)
+    await expect(
+      page.getByText('Authentication failed. Please check your credentials and try again.'),
+    ).toBeVisible()
+    await expect(page.locator('.mantine-Alert-root')).toHaveCount(0)
   })
 })

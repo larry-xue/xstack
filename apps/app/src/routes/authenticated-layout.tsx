@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { CommandPalette } from '@/components/workspace/command-palette'
 import { WorkspaceShell } from '@/components/workspace/workspace-shell'
 import type { WorkspaceNavItem } from '@/components/workspace/workspace-sidebar'
+import { handleUiError } from '@/lib/error-pipeline'
 import { useAuth } from '@/providers/auth'
 
 const AuthenticatedLayout = () => {
@@ -93,8 +94,14 @@ const AuthenticatedLayout = () => {
           void navigate({ to })
         }}
         onSignOut={async () => {
-          await signOut()
-          await navigate({ to: '/auth' })
+          try {
+            await signOut()
+            await navigate({ to: '/auth' })
+          } catch (error) {
+            handleUiError(error, {
+              fallbackI18nKey: 'errors.signOutFailed',
+            })
+          }
         }}
         email={session.user.email}
       >

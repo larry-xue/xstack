@@ -2,6 +2,7 @@ import { getAccessToken } from './auth'
 import { createApiClient, unwrapApiEnvelope } from '@repo/api-client'
 
 const apiClient = createApiClient({
+  baseUrl: '',
   getAccessToken,
 })
 
@@ -11,13 +12,14 @@ type TodosGetOptions = Parameters<TodosGet>[0]
 type TodoByIdClient = ReturnType<TodosClient>
 type TodoPatch = TodoByIdClient['patch']
 
-export type TaskListQuery = NonNullable<TodosGetOptions> extends { query?: infer Query }
-  ? NonNullable<Query>
-  : never
+export type TaskListQuery =
+  NonNullable<TodosGetOptions> extends { query?: infer Query } ? NonNullable<Query> : never
 type UpdateTodoPatch = NonNullable<Parameters<TodoPatch>[0]>
 
 export const getTasks = async (query?: TaskListQuery) => {
-  const response = query ? await apiClient.api.v1.todos.get({ query }) : await apiClient.api.v1.todos.get()
+  const response = query
+    ? await apiClient.api.v1.todos.get({ query })
+    : await apiClient.api.v1.todos.get()
   return unwrapApiEnvelope(response, 'Failed to fetch todos')
 }
 

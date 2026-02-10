@@ -114,6 +114,25 @@ const en = {
       actionFailed: 'Task action failed',
     },
   },
+  errors: {
+    title: 'Request failed',
+    sessionExpired: 'Your session has expired. Please sign in again.',
+    network: 'Network error. Please check your connection and try again.',
+    unknown: 'Something went wrong. Please try again.',
+    authFailed: 'Authentication failed. Please check your credentials and try again.',
+    signOutFailed: 'Sign out failed. Please try again.',
+    codes: {
+      AUTH_MISSING_TOKEN: 'Please sign in to continue.',
+      AUTH_INVALID_TOKEN: 'Your session is no longer valid. Please sign in again.',
+      TASK_NOT_FOUND: 'Task not found.',
+      VALIDATION_ERROR: 'The submitted data is invalid.',
+      PARSE_ERROR: 'The request format is invalid.',
+      ROUTE_NOT_FOUND: 'Endpoint not found.',
+      DATABASE_UNAVAILABLE: 'Service is temporarily unavailable.',
+      DATABASE_ERROR: 'Failed to process your request. Please try again.',
+      INTERNAL_ERROR: 'Internal server error. Please try again later.',
+    },
+  },
   router: {
     notFound: {
       code: '404',

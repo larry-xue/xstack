@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
   ActionIcon,
-  Alert,
   Badge,
   Button,
   Group,
@@ -32,7 +31,6 @@ const TasksPage = () => {
   const [newTitle, setNewTitle] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
-  const [actionError, setActionError] = useState<string | null>(null)
   const [status, setStatus] = useState<TaskStatus>('all')
   const [sortBy, setSortBy] = useState<TaskSortBy>('createdAt')
   const [sortOrder, setSortOrder] = useState<TaskSortOrder>('desc')
@@ -50,43 +48,46 @@ const TasksPage = () => {
     [page, pageSize, sortBy, sortOrder, status],
   )
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['tasks', query],
     queryFn: () => getTasks(query),
+    meta: {
+      fallbackI18nKey: 'tasks.errors.loadFailed',
+    },
   })
 
   const createMutation = useMutation({
     mutationFn: createTask,
+    meta: {
+      fallbackI18nKey: 'tasks.errors.createFailed',
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       setNewTitle('')
       setPage(1)
-    },
-    onError: err => {
-      setActionError(err instanceof Error ? err.message : t('tasks.errors.createFailed'))
     },
   })
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data: patch }: { id: string; data: { title?: string; isDone?: boolean } }) =>
       updateTask(id, patch),
+    meta: {
+      fallbackI18nKey: 'tasks.errors.updateFailed',
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       setEditingId(null)
       setEditingTitle('')
     },
-    onError: err => {
-      setActionError(err instanceof Error ? err.message : t('tasks.errors.updateFailed'))
-    },
   })
 
   const deleteMutation = useMutation({
     mutationFn: deleteTask,
+    meta: {
+      fallbackI18nKey: 'tasks.errors.deleteFailed',
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
-    },
-    onError: err => {
-      setActionError(err instanceof Error ? err.message : t('tasks.errors.deleteFailed'))
     },
   })
 
@@ -127,7 +128,6 @@ const TasksPage = () => {
       return
     }
 
-    setActionError(null)
     createMutation.mutate(trimmed)
   }
 
@@ -148,12 +148,10 @@ const TasksPage = () => {
       return
     }
 
-    setActionError(null)
     updateMutation.mutate({ id: task.id, data: { title: trimmed } })
   }
 
   const toggleDone = (task: Task) => {
-    setActionError(null)
     updateMutation.mutate({ id: task.id, data: { isDone: !task.isDone } })
   }
 
@@ -255,12 +253,6 @@ const TasksPage = () => {
         </Group>
       </Paper>
 
-      {actionError && (
-        <Alert color="red" title={t('tasks.errors.actionFailed')}>
-          {actionError}
-        </Alert>
-      )}
-
       {isLoading && (
         <Group gap={8}>
           <Loader size="sm" />
@@ -268,12 +260,6 @@ const TasksPage = () => {
             {t('tasks.loading')}
           </Text>
         </Group>
-      )}
-
-      {isError && (
-        <Alert color="red" title={t('tasks.errors.loadFailed')}>
-          {error instanceof Error ? error.message : t('tasks.errors.loadFailed')}
-        </Alert>
       )}
 
       {!isLoading && !isError && tasks.length === 0 && (
